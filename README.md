@@ -1,8 +1,3 @@
-```
-npm install
-npm run dev
-```
+# pwa-cloudflare-demo
 
-```
-npm run deploy
-```
+This demonstrates building a PWA that is deployed to a Cloudflare Worker.
