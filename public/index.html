@@ -4,6 +4,8 @@
     <title>PWA Demo</title>
 
     <meta charset="UTF-8" />
+    <!-- unsafe-inline is needed in order to use Alpine.
+         See https://alpinejs.dev/advanced/csp -->
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'"
@@ -43,19 +45,24 @@
   </head>
   <body>
     <h1>PWA Demo</h1>
-    <h2>Alpine Counter</h2>
-    <div class="counter" x-data="{ count: 0 }">
-      <button x-bind:disabled="count <= 0" x-on:click="count--">-</button>
-      <div x-text="count"></div>
-      <button x-on:click="count++">+</button>
-    </div>
-    <div style="margin-top: 1rem">
+
+    <section>
+      <h2>Alpine Counter</h2>
+      <div class="counter" x-data="{ count: 0 }">
+        <button x-bind:disabled="count <= 0" x-on:click="count--">-</button>
+        <div x-text="count"></div>
+        <button x-on:click="count++">+</button>
+      </div>
+    </section>
+
+    <section>
       <button hx-get="/get-text" hx-target="#text">Get Text</button>
       <span id="text"></span>
-    </div>
-    <div style="margin-top: 1rem">
+    </section>
+
+    <section>
       <button hx-get="/get-html" hx-target="#html">Get HTML</button>
       <span id="html"></span>
-    </div>
+    </section>
   </body>
 </html>
