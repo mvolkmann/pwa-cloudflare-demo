@@ -17,6 +17,7 @@
     />
 
     <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="/styles.css" />
 
     <script defer src="/alpine.min.js"></script>
     <script defer src="/htmx.min.js"></script>
@@ -43,18 +44,18 @@
   <body>
     <h1>PWA Demo</h1>
     <h2>Alpine Counter</h2>
-    <div style="display: flex; gap: 1rem" x-data="{ count: 0 }">
+    <div class="counter" x-data="{ count: 0 }">
       <button x-bind:disabled="count <= 0" x-on:click="count--">-</button>
       <div x-text="count"></div>
       <button x-on:click="count++">+</button>
     </div>
     <div style="margin-top: 1rem">
       <button hx-get="/get-text" hx-target="#text">Get Text</button>
-      <div id="text"></div>
+      <span id="text"></span>
     </div>
     <div style="margin-top: 1rem">
       <button hx-get="/get-html" hx-target="#html">Get HTML</button>
-      <div id="html"></div>
+      <span id="html"></span>
     </div>
   </body>
 </html>

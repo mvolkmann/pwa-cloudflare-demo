@@ -1,0 +1,20 @@
+body {
+  background-color: cornflowerblue;
+  font-family: sans-serif;
+}
+
+button {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+h1 {
+  color: orange;
+}
