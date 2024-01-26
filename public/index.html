@@ -46,8 +46,12 @@
       <button x-on:click="count++">+</button>
     </div>
     <div style="margin-top: 1rem">
-      <button hx-get="/demo" hx-target="#results">Fetch</button>
-      <div id="results"></div>
+      <button hx-get="/get-text" hx-target="#text">Get Text</button>
+      <div id="text"></div>
+    </div>
+    <div style="margin-top: 1rem">
+      <button hx-get="/get-html" hx-target="#html">Get HTML</button>
+      <div id="html"></div>
     </div>
   </body>
 </html>
