@@ -15,37 +15,17 @@
         style-src 'self' 'unsafe-inline'"
     />
     <meta name="theme-color" content="#ff0000" />
-    <!-- Adding user-scalable="no" prevents double-taps from zooming. -->
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0,
-    maximum-scale=1.0, user-scalable=no"
-    />
+    <!-- Adding maximum-scale=1.0, user-scalable="no"
+         prevents double-taps from zooming,
+         but it results in a poor Lighthouse accessibility score. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/styles.css" />
 
     <script defer src="/alpine.min.js"></script>
     <script defer src="/htmx.min.js"></script>
-
-    <script>
-      async function setup() {
-        if ("serviceWorker" in navigator) {
-          try {
-            const registration = await navigator.serviceWorker.register(
-              "/service-worker.js"
-            );
-            console.log(
-              "service worker registered with scope",
-              registration.scope
-            );
-          } catch (error) {
-            console.error("service worker registered failed:", error);
-          }
-        }
-      }
-      setup();
-    </script>
+    <script src="setup.js"></script>
   </head>
   <body>
     <h1>PWA Demo</h1>
@@ -69,6 +49,7 @@
       <span id="html"></span>
     </section>
 
+    <h2>Pokemon</h2>
     <table
       hx-trigger="load"
       hx-get="/pokemon-rows?page=1"
@@ -76,9 +57,9 @@
       hx-swap="beforeend"
     >
       <tr>
-        <th>ID</td>
-        <th>Name</td>
-        <th>Description</td>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
       </tr>
     </table>
     <img alt="loading..." class="htmx-indicator" src="/images/spinner.gif" />

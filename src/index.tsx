@@ -1,5 +1,5 @@
-import { Context, Hono } from "hono";
-import { serveStatic } from "hono/cloudflare-workers";
+import {Context, Hono} from 'hono';
+import {serveStatic} from 'hono/cloudflare-workers';
 
 type Pokemon = {
   name: string;
@@ -7,34 +7,34 @@ type Pokemon = {
 };
 
 const POKEMON_IMAGE_URL_PREFIX =
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
-const POKEMON_URL_PREFIX = "https://pokeapi.co/api/v2/pokemon-species";
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+const POKEMON_URL_PREFIX = 'https://pokeapi.co/api/v2/pokemon-species';
 const ROWS_PER_PAGE = 10;
 
 const app = new Hono();
 
 // Serve static files from the public directory.
-app.use("/*", serveStatic({ root: "./" }));
+app.use('/*', serveStatic({root: './'}));
 
-app.get("/get-text", (c) => {
-  return c.text("This is text.");
+app.get('/get-text', c => {
+  return c.text('This is text.');
 });
 
-app.get("/get-html", (c) => {
+app.get('/get-html', c => {
   return c.html(<b>This is HTML.</b>);
 });
 
 function TableRow(page: number, pokemon: Pokemon, isLast: boolean) {
   const attributes = isLast
     ? {
-        "hx-trigger": "revealed",
-        "hx-get": "/pokemon-rows?page=" + (page + 1),
-        "hx-indicator": ".htmx-indicator",
-        "hx-swap": "afterend",
+        'hx-trigger': 'revealed',
+        'hx-get': '/pokemon-rows?page=' + (page + 1),
+        'hx-indicator': '.htmx-indicator',
+        'hx-swap': 'afterend'
       }
     : {};
-  const { name, url } = pokemon;
-  const id = url.split("/")[6]; // 7th part of the URL
+  const {name, url} = pokemon;
+  const id = url.split('/')[6]; // 7th part of the URL
   const imageUrl = `${POKEMON_IMAGE_URL_PREFIX}${id}.png`;
 
   return (
@@ -48,9 +48,9 @@ function TableRow(page: number, pokemon: Pokemon, isLast: boolean) {
   );
 }
 
-app.get("/pokemon-rows", async (c: Context) => {
-  const page = c.req.query("page");
-  if (!page) throw new Error("page query parameter is required");
+app.get('/pokemon-rows', async (c: Context) => {
+  const page = c.req.query('page');
+  if (!page) throw new Error('page query parameter is required');
 
   // Bun.sleepSync(500); // simulates long-running query
 
