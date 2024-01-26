@@ -45,5 +45,9 @@
       <div x-text="count"></div>
       <button x-on:click="count++">+</button>
     </div>
+    <div style="margin-top: 1rem">
+      <button hx-get="/demo" hx-target="#results">Fetch</button>
+      <div id="results"></div>
+    </div>
   </body>
 </html>

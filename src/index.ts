@@ -7,7 +7,8 @@ const app = new Hono();
 app.use("/*", serveStatic({ root: "./" }));
 
 app.get("/demo", (c) => {
-  return c.html("Hello Hono!");
+  // TODO: Try using JSX and c.html.
+  return c.text("htmx works!");
 });
 
 export default app;
