@@ -1,9 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title>PWA Demo</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PWA Demo</title>
+    <link rel="manifest" href="/manifest.json" />
+    <script>
+      async function setup() {
+        if ("serviceWorker" in navigator) {
+          try {
+            const registration = await navigator.serviceWorker.register(
+              "/service-worker.js"
+            );
+            console.log(
+              "service worker registered with scope",
+              registration.scope
+            );
+          } catch (error) {
+            console.error("service worker registered failed:", error);
+          }
+        }
+      }
+      setup();
+    </script>
   </head>
   <body>
     <h1>PWA Demo</h1>
