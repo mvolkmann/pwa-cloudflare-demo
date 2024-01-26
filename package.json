@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev src/index.tsx",
-    "deploy": "wrangler deploy --minify src/index.ts",
+    "deploy": "wrangler deploy --minify src/index.tsx",
     "reinstall": "rm -rf node_modules bun.lockb && bun install"
   },
   "dependencies": {
