@@ -7,18 +7,18 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "/images/Boston2013-192.png",
+      "src": "/images/logo-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
     },
     {
-      "src": "/images/Boston2013-192.png",
+      "src": "/images/logo-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/images/Boston2013-512.png",
+      "src": "/images/logo-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
