@@ -1,0 +1,7 @@
+{
+  "name": "PWA demo app that runs in a Cloudflare Worker",
+  "short_name": "PWA Demo",
+  "start_url": "https://pwa-demo.mvolkmann.workers.dev",
+  "icons": [],
+  "display": ""
+}
