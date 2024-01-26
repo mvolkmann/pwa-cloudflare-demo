@@ -2,14 +2,19 @@
 <html lang="en">
   <head>
     <title>PWA Demo</title>
+
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src https://*"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'"
     />
     <meta name="theme-color" content="#ff0000" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="manifest" href="/manifest.json" />
+
+    <script defer src="/alpine.min.js"></script>
+
     <script>
       async function setup() {
         if ("serviceWorker" in navigator) {
@@ -31,6 +36,11 @@
   </head>
   <body>
     <h1>PWA Demo</h1>
-    <p>Does this work?</p>
+    <h2>Alpine Counter</h2>
+    <div style="display: flex; gap: 1rem" x-data="{ count: 0 }">
+      <button x-bind:disabled="count <= 0" x-on:click="count--">-</button>
+      <div x-text="count"></div>
+      <button x-on:click="count++">+</button>
+    </div>
   </body>
 </html>

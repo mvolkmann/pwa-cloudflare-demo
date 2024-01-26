@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy --minify src/index.ts"
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "reinstall": "rm -rf node_modules bun.lockb && bun install"
   },
   "dependencies": {
     "hono": "^3.12.7"
