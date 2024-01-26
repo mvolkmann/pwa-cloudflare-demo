@@ -3,7 +3,15 @@
   "name": "PWA demo app that runs in a Cloudflare Worker",
   "short_name": "PWA Demo",
   "start_url": "/",
+  "background_color": "#0000ff",
+  "display": "standalone",
   "icons": [
+    {
+      "src": "/images/Boston2013-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
     {
       "src": "/images/Boston2013-192.png",
       "type": "image/png",
@@ -15,5 +23,5 @@
       "sizes": "512x512"
     }
   ],
-  "display": "standalone"
+  "theme_color": "#ff0000"
 }
