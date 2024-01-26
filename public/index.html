@@ -8,7 +8,11 @@
          See https://alpinejs.dev/advanced/csp -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'"
+      content="
+        default-src 'self';
+        img-src 'self' https://raw.githubusercontent.com;
+        script-src 'self' 'unsafe-eval';
+        style-src 'self' 'unsafe-inline'"
     />
     <meta name="theme-color" content="#ff0000" />
     <!-- Adding user-scalable="no" prevents double-taps from zooming. -->
@@ -64,5 +68,19 @@
       <button hx-get="/get-html" hx-target="#html">Get HTML</button>
       <span id="html"></span>
     </section>
+
+    <table
+      hx-trigger="load"
+      hx-get="/pokemon-rows?page=1"
+      hx-indicator=".htmx-indicator"
+      hx-swap="beforeend"
+    >
+      <tr>
+        <th>ID</td>
+        <th>Name</td>
+        <th>Description</td>
+      </tr>
+    </table>
+    <img alt="loading..." class="htmx-indicator" src="/images/spinner.gif" />
   </body>
 </html>

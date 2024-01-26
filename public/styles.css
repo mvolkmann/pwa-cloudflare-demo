@@ -19,6 +19,30 @@ h1 {
   color: orange;
 }
 
+.htmx-indicator {
+  height: 1.5rem;
+  margin-top: 0.5rem;
+  width: 1.5rem;
+}
+
 section {
   margin-bottom: 1rem;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+td {
+  background-color: white;
+}
+
+th {
+  background-color: orange;
+}
+
+td,
+th {
+  border: 1px solid black;
+  padding: 0.5rem;
 }
