@@ -1,7 +1,19 @@
 {
+  "description": "PWA demo app that runs in a Cloudflare Worker",
   "name": "PWA demo app that runs in a Cloudflare Worker",
   "short_name": "PWA Demo",
-  "start_url": "https://pwa-demo.mvolkmann.workers.dev",
-  "icons": [],
-  "display": ""
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/images/Boston2013-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/images/Boston2013-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "display": "standalone"
 }
