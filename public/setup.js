@@ -6,11 +6,6 @@ async function setup() {
 
   try {
     db = await openDB();
-    console.log('setup.js: opened db');
-    const stores = ['dogs'];
-    txn = db.transaction(stores, 'readwrite');
-    // dogStore = txn.objectStore(storeName);
-
     await clearDogs();
     await createDog('Comet', 'Whippet');
     await createDog('Oscar', 'German Shorthaired Pointer');
@@ -76,19 +71,16 @@ function openDB() {
       const storeName = 'dogs';
       const options = {autoIncrement: true, keyPath: 'id'};
       dogStore = db.createObjectStore(storeName, options);
-      console.log('created dogStore');
       dogStore.createIndex('breed', ['breed'], {unique: false});
-      console.log('created breed index');
-      const txn = event.target.transaction;
-      txn.oncomplete = () => resolve(db);
     };
 
-    request.onsuccess = () => {
-      console.log('success!');
+    request.onsuccess = event => {
+      const db = request.result;
+      resolve(db);
     };
 
     request.onerror = event => {
-      console.error('failed');
+      console.error('failed to open database');
       reject(event);
     };
   });
@@ -97,9 +89,7 @@ function openDB() {
 function createStore() {}
 
 function clearDogs() {
-  console.log('clearDogs: db =', db);
   const txn = db.transaction('dogs', 'readwrite');
-  console.log('clearDogs: txn =', txn);
   const store = txn.objectStore('dogs');
   const request = store.clear();
   return requestToPromise(request, 'clear store');
