@@ -50,14 +50,31 @@
     </section>
 
     <section>
-      <button hx-get="/dog" hx-target="#dog-table-body">Get Dogs</button>
-      <button hx-post="/dog" hx-target="#dog-table-body" hx-swap="beforeend">
-        Add Snoopy
-      </button>
-      <button hx-put="/dog" hx-target="#dog-table-body">Update Snoopy</button>
-      <button hx-delete="/dog" hx-target="#dog-table-body">
-        Delete Snoopy
-      </button>
+      <form>
+        <div>
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" />
+        </div>
+        <div>
+          <label for="breed">Breed</label>
+          <input id="breed" name="breed" type="text" />
+        </div>
+        <button hx-post="/dog" hx-target="#dog-table-body" hx-swap="beforeend">
+          Submit
+        </button>
+      </form>
+
+      <div>
+        <button hx-get="/dog" hx-target="#dog-table-body">Get Dogs</button>
+        <button hx-post="/dog" hx-target="#dog-table-body" hx-swap="beforeend">
+          Add Snoopy
+        </button>
+        <button hx-put="/dog" hx-target="#dog-table-body">Update Snoopy</button>
+        <button hx-delete="/dog" hx-target="#dog-table-body">
+          Delete Snoopy
+        </button>
+      </div>
+
       <h2>Dogs</h2>
       <table>
         <thead>

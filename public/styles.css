@@ -6,7 +6,7 @@ body {
 button {
   border: none;
   border-radius: 0.5rem;
-  font-size: 2rem;
+  font-size: 1.5rem;
   padding: 0.5rem;
 }
 
@@ -17,6 +17,23 @@ button {
   font-size: 2rem;
 }
 
+form {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  background-color: lightyellow;
+  border: 1px solid blue;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+
+input {
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
 h1 {
   color: orange;
 }
@@ -25,6 +42,10 @@ h1 {
   height: 1.5rem;
   margin-top: 0.5rem;
   width: 1.5rem;
+}
+
+label {
+  font-weight: bold;
 }
 
 section {
