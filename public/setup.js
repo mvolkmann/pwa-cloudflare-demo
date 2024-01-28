@@ -1,14 +1,15 @@
 let db;
-const dbName = 'myDB';
-const storeName = 'dogs';
 
 async function setup() {
   const estimate = await navigator.storage.estimate();
   console.log('setup.js: storage estimate =', estimate);
 
+  const dbName = 'myDB';
+  const storeName = 'dogs';
+
   try {
     await deleteDB(dbName);
-    db = await openDB();
+    db = await openDB(dbName, storeName);
     await clearStore(storeName);
 
     // Unless the database is deleted and recreated,
@@ -80,25 +81,9 @@ async function setup() {
 
 setup();
 
-function requestToPromise(request, action) {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = () => {
-      console.log('succeeded to', action);
-      resolve(request.result);
-    };
-    request.onerror = event => {
-      console.error('failed to', action);
-      reject(event);
-    };
-  });
-}
+//-----------------------------------------------------------------------------
 
-function deleteDB(dbName) {
-  const request = indexedDB.deleteDatabase(dbName);
-  return requestToPromise(request, 'delete database');
-}
-
-function openDB() {
+function openDB(dbName, storeName) {
   const version = 1;
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, version);
@@ -125,6 +110,8 @@ function openDB() {
   });
 }
 
+//-----------------------------------------------------------------------------
+
 function clearStore(storeName) {
   const txn = db.transaction(storeName, 'readwrite');
   const store = txn.objectStore(storeName);
@@ -137,6 +124,18 @@ function createRecord(storeName, object) {
   const store = txn.objectStore(storeName);
   const request = store.add(object);
   return requestToPromise(request, 'create record');
+}
+
+function deleteDB(dbName) {
+  const request = indexedDB.deleteDatabase(dbName);
+  return requestToPromise(request, 'delete database');
+}
+
+function deleteRecordByKey(storeName, key) {
+  const txn = db.transaction(storeName, 'readwrite');
+  const store = txn.objectStore(storeName);
+  const request = store.delete(key);
+  return requestToPromise(request, 'delete dog');
 }
 
 function getAllRecords(storeName) {
@@ -161,16 +160,22 @@ function getRecordsByIndex(storeName, indexName, indexValue) {
   return requestToPromise(request, 'get records by index');
 }
 
+function requestToPromise(request, action) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => {
+      // console.log('succeeded to', action);
+      resolve(request.result);
+    };
+    request.onerror = event => {
+      console.error('failed to', action);
+      reject(event);
+    };
+  });
+}
+
 function upsertRecord(storeName, object) {
   const txn = db.transaction(storeName, 'readwrite');
   const store = txn.objectStore(storeName);
   const request = store.put(object);
   return requestToPromise(request, 'update dog');
-}
-
-function deleteRecordByKey(storeName, key) {
-  const txn = db.transaction(storeName, 'readwrite');
-  const store = txn.objectStore(storeName);
-  const request = store.delete(key);
-  return requestToPromise(request, 'delete dog');
 }
