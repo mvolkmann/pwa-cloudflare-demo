@@ -121,7 +121,6 @@ async function setupDatabase() {
       });
 
       const dogs = await getAllRecords(storeName);
-      // console.log('dogs =', dogs);
 
       const comet = dogs.find(dog => dog.name === 'Comet');
       if (comet) {
@@ -131,7 +130,7 @@ async function setupDatabase() {
 
       await upsertRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
     }
-    G;
+
     /*
     const oscar = await getRecordByKey(storeName, 2);
     console.log('oscar =', oscar);
