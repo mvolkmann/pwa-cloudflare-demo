@@ -48,6 +48,11 @@ async function getDogs() {
   });
 }
 
+async function updateSnoopy() {
+  await updateRecordsByIndex('dogs', 'name-index', 'Snoopy', 'Woodstock');
+  return getDogs();
+}
+
 // No fetch events are generated in the initial load of the web app.
 // A second visit is required to cache all the resources.
 self.addEventListener('fetch', async event => {
@@ -63,6 +68,8 @@ self.addEventListener('fetch', async event => {
     } else if (method === 'POST') {
       //TODO: How can you get the request body?
       event.respondWith(addSnoopy());
+    } else if (method === 'PUT') {
+      event.respondWith(updateSnoopy());
     } else if (method === 'DELETE') {
       event.respondWith(deleteSnoopy());
     }
@@ -241,7 +248,7 @@ function deleteRecordsByIndex(storeName, indexName, value) {
       resolve();
     };
     request.onerror = event => {
-      console.error('failed to delete records by property');
+      console.error('failed to delete records by index');
       txn.abort();
       reject(event);
     };
@@ -298,6 +305,29 @@ function requestToPromise(request, action) {
     request.onerror = event => {
       console.error('failed to', action);
       request.transaction.abort();
+      reject(event);
+    };
+  });
+}
+
+function updateRecordsByIndex(storeName, indexName, oldValue, newValue) {
+  return new Promise((resolve, reject) => {
+    const txn = db.transaction(storeName, 'readwrite');
+    const store = txn.objectStore(storeName);
+    const index = store.index(indexName);
+    const request = index.getAll(oldValue);
+    request.onsuccess = event => {
+      const records = event.target.result;
+      for (const record of records) {
+        record[index.keyPath] = newValue;
+        store.put(record);
+      }
+      txn.commit();
+      resolve();
+    };
+    request.onerror = event => {
+      console.error('failed to update records by index');
+      txn.abort();
       reject(event);
     };
   });
