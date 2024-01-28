@@ -108,27 +108,30 @@ async function setupDatabase() {
 
   try {
     db = await openDB(storeName);
-    await clearStore(storeName);
+    // await clearStore(storeName);
 
-    // Unless the database is deleted and recreated,
-    // these records will be recreated with new key values.
-    await createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
-    await createRecord(storeName, {
-      name: 'Oscar',
-      breed: 'German Shorthaired Pointer'
-    });
+    const count = await getRecordCount(storeName);
+    if (count === 0) {
+      // Unless the database is deleted and recreated,
+      // these records will be recreated with new key values.
+      await createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
+      await createRecord(storeName, {
+        name: 'Oscar',
+        breed: 'German Shorthaired Pointer'
+      });
 
-    const dogs = await getAllRecords(storeName);
-    // console.log('dogs =', dogs);
+      const dogs = await getAllRecords(storeName);
+      // console.log('dogs =', dogs);
 
-    const comet = dogs.find(dog => dog.name === 'Comet');
-    if (comet) {
-      comet.name = 'Fireball';
-      await upsertRecord(storeName, comet);
+      const comet = dogs.find(dog => dog.name === 'Comet');
+      if (comet) {
+        comet.name = 'Fireball';
+        await upsertRecord(storeName, comet);
+      }
+
+      await upsertRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
     }
-
-    await upsertRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
-
+    G;
     /*
     const oscar = await getRecordByKey(storeName, 2);
     console.log('oscar =', oscar);
@@ -241,6 +244,13 @@ function getRecordByKey(storeName, key) {
   return requestToPromise(request, 'get record by key');
 }
 
+function getRecordCount(storeName) {
+  const txn = db.transaction(storeName, 'readonly');
+  const store = txn.objectStore(storeName);
+  const request = store.count();
+  return requestToPromise(request, 'get record count');
+}
+
 function getRecordsByIndex(storeName, indexName, indexValue) {
   const txn = db.transaction(storeName, 'readonly');
   const store = txn.objectStore(storeName);
@@ -252,11 +262,13 @@ function getRecordsByIndex(storeName, indexName, indexValue) {
 function requestToPromise(request, action) {
   return new Promise((resolve, reject) => {
     request.onsuccess = event => {
-      // console.log('succeeded to', action);
+      console.log('succeeded to', action);
+      request.transaction.commit();
       resolve(request.result);
     };
     request.onerror = event => {
       console.error('failed to', action);
+      request.transaction.abort();
       reject(event);
     };
   });
