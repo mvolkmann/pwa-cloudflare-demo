@@ -50,18 +50,21 @@
     </section>
 
     <section>
-      <button hx-get="/dog" hx-target="#dogs">Get Dogs</button>
-      <ul id="dogs"></ul>
+      <button hx-get="/dog" hx-target="#dog-table" hx-swap="beforeend">
+        Get Dogs
+      </button>
+      <button hx-post="/dog" hx-target="#dog-table" hx-swap="beforeend">
+        Add Dog
+      </button>
+      <h2>Dogs</h2>
+      <table id="dog-table">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Breed</th>
+        </tr>
+      </table>
     </section>
-
-    <h2>Dogs</h2>
-    <table>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Breed</th>
-      </tr>
-    </table>
 
     <!-- <h2>Pokemon</h2>
     <table

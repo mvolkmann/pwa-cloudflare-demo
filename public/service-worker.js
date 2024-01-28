@@ -10,19 +10,34 @@ async function deleteCache(cacheName) {
   );
 }
 
+self.addEventListener('install', event => {
+  // This causes a newly installed service worker to
+  // progress to the activating state, regardless of
+  // whether there is already an active service worker.
+  self.skipWaiting();
+});
+
 self.addEventListener('activate', event => {
   event.waitUntil(deleteCache(cacheName));
 });
 
-// AFTER MODIFYING THIS CODE:
-// - click the "Unregister" link for the service worker in the DevTools Application tab
-// - refresh the browser twice (don't know why yet)
+async function addDog() {
+  const dog = {name: 'Snoopy', breed: 'Beagle'};
+  dog.id = await createRecord('dogs', dog);
+  const html = dogToTableRow(dog);
+  return new Response(html, {
+    headers: {'Content-Type': 'application/html'}
+  });
+}
+
+function dogToTableRow(dog) {
+  const {breed, id, name} = dog;
+  return `<tr><td>${id}</td><td>${name}</td><td>${breed}</td></tr>`;
+}
 
 async function getDogs() {
   const dogs = await getAllRecords('dogs');
-  const html = dogs
-    .map(dog => `<li>${dog.name} is a ${dog.breed}</li>`)
-    .join('');
+  const html = dogs.map(dogToTableRow).join('');
   return new Response(html, {
     headers: {'Content-Type': 'application/html'}
   });
@@ -33,13 +48,17 @@ async function getDogs() {
 self.addEventListener('fetch', async event => {
   const {request} = event;
 
+  const {method} = request;
   const url = new URL(request.url);
   if (url.pathname.startsWith('/dog')) {
-    //TODO: How can you get the request body?
-    console.log('service-worker.js fetch: method =', request.method);
-    console.log('service-worker.js fetch: url =', url);
-    // console.log('service-worker.js fetch: query =', request.search);
-    event.respondWith(getDogs());
+    console.log('service-worker.js fetch: got dog request');
+    console.log('service-worker.js fetch: method =', method);
+    if (method === 'GET') {
+      event.respondWith(getDogs());
+    } else if (method === 'POST') {
+      //TODO: How can you get the request body?
+      event.respondWith(addDog());
+    }
     return;
   }
 
@@ -232,7 +251,7 @@ function getRecordsByIndex(storeName, indexName, indexValue) {
 
 function requestToPromise(request, action) {
   return new Promise((resolve, reject) => {
-    request.onsuccess = () => {
+    request.onsuccess = event => {
       // console.log('succeeded to', action);
       resolve(request.result);
     };
