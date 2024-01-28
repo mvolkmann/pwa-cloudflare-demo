@@ -7,9 +7,9 @@ async function setup() {
   console.log('setup.js: storage estimate =', estimate);
 
   try {
-    await deleteDB();
+    await deleteDB(dbName);
     db = await openDB();
-    await clearDogs();
+    await clearStore(storeName);
 
     // Unless the database is deleted and recreated,
     // these records will be recreated with new key values.
@@ -84,7 +84,7 @@ function requestToPromise(request, action) {
   });
 }
 
-function deleteDB() {
+function deleteDB(dbName) {
   const request = indexedDB.deleteDatabase(dbName);
   return requestToPromise(request, 'delete database');
 }
@@ -116,9 +116,7 @@ function openDB() {
   });
 }
 
-function createStore() {}
-
-function clearDogs() {
+function clearStore(storeName) {
   const txn = db.transaction(storeName, 'readwrite');
   const store = txn.objectStore(storeName);
   const request = store.clear();
