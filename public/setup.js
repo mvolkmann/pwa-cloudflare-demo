@@ -14,7 +14,6 @@ async function setup() {
     // Unless the database is deleted and recreated,
     // these records will be recreated with new key values.
     await createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
-    await createRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
     await createRecord(storeName, {
       name: 'Oscar',
       breed: 'German Shorthaired Pointer'
@@ -29,6 +28,8 @@ async function setup() {
       await upsertRecord(storeName, comet);
     }
 
+    await upsertRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
+
     const oscar = await getRecordByKey(storeName, 2);
     console.log('oscar =', oscar);
 
@@ -39,7 +40,7 @@ async function setup() {
     );
     console.log('whippets =', whippets);
 
-    await deleteDog(3);
+    await deleteDog(2);
     const remainingDogs = await getAllRecords('dogs');
     console.log('remainingDogs =', remainingDogs);
   } catch (error) {
