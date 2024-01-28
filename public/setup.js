@@ -142,7 +142,7 @@ function deleteRecordByKey(storeName, key) {
 }
 
 function deleteStore(storeName) {
-  // TODO: Write this.
+  db.deleteObjectStore(storeName);
 }
 
 function getAllRecords(storeName) {
