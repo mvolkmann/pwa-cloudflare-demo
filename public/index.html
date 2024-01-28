@@ -50,22 +50,23 @@
     </section>
 
     <section>
-      <button hx-get="/dog" hx-target="#dog-table" hx-swap="beforeend">
-        Get Dogs
-      </button>
-      <button hx-post="/dog" hx-target="#dog-table" hx-swap="beforeend">
+      <button hx-get="/dog" hx-target="#dog-table-body">Get Dogs</button>
+      <button hx-post="/dog" hx-target="#dog-table-body" hx-swap="beforeend">
         Add Snoopy
       </button>
-      <button hx-delete="/dog" hx-target="#dog-table" hx-swap="beforeend">
+      <button hx-delete="/dog" hx-target="#dog-table-body">
         Delete Snoopy
       </button>
       <h2>Dogs</h2>
-      <table id="dog-table">
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Breed</th>
-        </tr>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Breed</th>
+          </tr>
+        </thead>
+        <tbody id="dog-table-body"></tbody>
       </table>
     </section>
 

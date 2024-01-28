@@ -31,11 +31,8 @@ async function addSnoopy() {
 }
 
 async function deleteSnoopy() {
-  await deleteRecordsByProperty('dogs', 'name-index', 'Snoopy');
-  const html = '';
-  return new Response(html, {
-    headers: {'Content-Type': 'application/html'}
-  });
+  await deleteRecordsByIndex('dogs', 'name-index', 'Snoopy');
+  return getDogs();
 }
 
 function dogToTableRow(dog) {
@@ -229,7 +226,7 @@ function deleteDB(dbName) {
   return requestToPromise(request, 'delete database');
 }
 
-function deleteRecordsByProperty(storeName, indexName, value) {
+function deleteRecordsByIndex(storeName, indexName, value) {
   return new Promise((resolve, reject) => {
     const txn = db.transaction(storeName, 'readwrite');
     const store = txn.objectStore(storeName);
