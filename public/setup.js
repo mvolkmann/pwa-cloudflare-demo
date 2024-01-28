@@ -14,6 +14,7 @@ async function setup() {
     // Unless the database is deleted and recreated,
     // these records will be recreated with new key values.
     await createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
+    await createRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
     await createRecord(storeName, {
       name: 'Oscar',
       breed: 'German Shorthaired Pointer'
@@ -25,17 +26,21 @@ async function setup() {
     const comet = dogs.find(dog => dog.name === 'Comet');
     if (comet) {
       comet.name = 'Fireball';
-      await updateDog(comet);
+      await upsertRecord(storeName, comet);
     }
 
     const oscar = await getRecordByKey(storeName, 2);
     console.log('oscar =', oscar);
 
-    const whippets = await getDogsByBreed('Whippet');
+    const whippets = await getRecordsByIndex(
+      storeName,
+      'breed-index',
+      'Whippet'
+    );
     console.log('whippets =', whippets);
 
-    await deleteDog(2);
-    const remainingDogs = await getAllDogs();
+    await deleteDog(3);
+    const remainingDogs = await getAllRecords('dogs');
     console.log('remainingDogs =', remainingDogs);
   } catch (error) {
     console.error('setup.js: failed to open db:', error);
@@ -147,20 +152,18 @@ function getRecordByKey(storeName, key) {
   return requestToPromise(request, 'get record by key');
 }
 
-function getDogsByBreed(breed) {
+function getRecordsByIndex(storeName, indexName, indexValue) {
   const txn = db.transaction(storeName, 'readonly');
   const store = txn.objectStore(storeName);
-  const index = store.index('breed-index');
-  const request = index.getAll(breed);
-  // const range = IDBKeyRange.only(breed);
-  // const request = index.getAll(range);
-  return requestToPromise(request, 'get dogs by breed');
+  const index = store.index(indexName);
+  const request = index.getAll(indexValue);
+  return requestToPromise(request, 'get records by index');
 }
 
-function updateDog(newDog) {
+function upsertRecord(storeName, object) {
   const txn = db.transaction(storeName, 'readwrite');
   const store = txn.objectStore(storeName);
-  const request = store.put(newDog);
+  const request = store.put(object);
   return requestToPromise(request, 'update dog');
 }
 
