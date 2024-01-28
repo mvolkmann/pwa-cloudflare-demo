@@ -13,10 +13,13 @@ async function setup() {
 
     // Unless the database is deleted and recreated,
     // these records will be recreated with new key values.
-    await createDog('Comet', 'Whippet');
-    await createDog('Oscar', 'German Shorthaired Pointer');
+    await createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
+    await createRecord(storeName, {
+      name: 'Oscar',
+      breed: 'German Shorthaired Pointer'
+    });
 
-    const dogs = await getAllDogs();
+    const dogs = await getAllRecords(storeName);
     console.log('dogs =', dogs);
 
     const comet = dogs.find(dog => dog.name === 'Comet');
@@ -123,19 +126,18 @@ function clearStore(storeName) {
   return requestToPromise(request, 'clear store');
 }
 
-function createDog(name, breed) {
+function createRecord(storeName, object) {
   const txn = db.transaction(storeName, 'readwrite');
   const store = txn.objectStore(storeName);
-  const dog = {name, breed};
-  const request = store.add(dog);
-  return requestToPromise(request, 'create dog');
+  const request = store.add(object);
+  return requestToPromise(request, 'create record');
 }
 
-function getAllDogs(key) {
+function getAllRecords(storeName) {
   const txn = db.transaction(storeName, 'readonly');
   const store = txn.objectStore(storeName);
   const request = store.getAll();
-  return requestToPromise(request, 'get all dogs');
+  return requestToPromise(request, 'get all records');
 }
 
 function getDogByKey(key) {
