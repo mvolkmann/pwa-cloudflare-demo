@@ -94,7 +94,7 @@ function openDB(dbName, storeName) {
       db = request.result;
       console.log('onupgradeneeded: db version =', db.version);
       const store = createStore(storeName, 'id', true);
-      store.createIndex('breed-index', 'breed', {unique: false});
+      createIndex(store, 'breed-index', 'breed');
     };
 
     request.onsuccess = event => {
@@ -116,6 +116,10 @@ function clearStore(storeName) {
   const store = txn.objectStore(storeName);
   const request = store.clear();
   return requestToPromise(request, 'clear store');
+}
+
+function createIndex(store, indexName, keyPath, unique = false) {
+  store.createIndex(indexName, keyPath, {unique});
 }
 
 function createStore(storeName, keyPath, autoIncrement = false) {
