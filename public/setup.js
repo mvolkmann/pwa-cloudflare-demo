@@ -40,7 +40,7 @@ async function setup() {
     );
     console.log('whippets =', whippets);
 
-    await deleteDog(2);
+    await deleteRecordByKey(storeName, 2);
     const remainingDogs = await getAllRecords('dogs');
     console.log('remainingDogs =', remainingDogs);
   } catch (error) {
@@ -168,7 +168,7 @@ function upsertRecord(storeName, object) {
   return requestToPromise(request, 'update dog');
 }
 
-function deleteDog(key) {
+function deleteRecordByKey(storeName, key) {
   const txn = db.transaction(storeName, 'readwrite');
   const store = txn.objectStore(storeName);
   const request = store.delete(key);
