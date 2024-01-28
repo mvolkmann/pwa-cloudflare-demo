@@ -22,7 +22,7 @@ async function setupDatabase() {
     });
 
     const dogs = await getAllRecords(storeName);
-    console.log('dogs =', dogs);
+    // console.log('dogs =', dogs);
 
     const comet = dogs.find(dog => dog.name === 'Comet');
     if (comet) {
@@ -32,6 +32,7 @@ async function setupDatabase() {
 
     await upsertRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
 
+    /*
     const oscar = await getRecordByKey(storeName, 2);
     console.log('oscar =', oscar);
 
@@ -45,6 +46,7 @@ async function setupDatabase() {
     await deleteRecordByKey(storeName, 2);
     const remainingDogs = await getAllRecords('dogs');
     console.log('remainingDogs =', remainingDogs);
+    */
   } catch (error) {
     console.error('setup.js: failed to open db:', error);
   }
