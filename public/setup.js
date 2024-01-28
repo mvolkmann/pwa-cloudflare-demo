@@ -91,10 +91,9 @@ function openDB(dbName, storeName) {
     request.onupgradeneeded = event => {
       console.log('onupgradeneeded: oldversion =', event.oldversion);
       console.log('onupgradeneeded: newversion =', event.newversion);
-      const db = request.result;
+      db = request.result;
       console.log('onupgradeneeded: db version =', db.version);
-      const options = {autoIncrement: true, keyPath: 'id'};
-      const store = db.createObjectStore(storeName, options);
+      const store = createStore(storeName, 'id', true);
       store.createIndex('breed-index', 'breed', {unique: false});
     };
 
@@ -119,6 +118,10 @@ function clearStore(storeName) {
   return requestToPromise(request, 'clear store');
 }
 
+function createStore(storeName, keyPath, autoIncrement = false) {
+  return db.createObjectStore(storeName, {autoIncrement, keyPath});
+}
+
 function createRecord(storeName, object) {
   const txn = db.transaction(storeName, 'readwrite');
   const store = txn.objectStore(storeName);
@@ -136,6 +139,10 @@ function deleteRecordByKey(storeName, key) {
   const store = txn.objectStore(storeName);
   const request = store.delete(key);
   return requestToPromise(request, 'delete dog');
+}
+
+function deleteStore(storeName) {
+  // TODO: Write this.
 }
 
 function getAllRecords(storeName) {
