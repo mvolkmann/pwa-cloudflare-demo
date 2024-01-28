@@ -10,16 +10,27 @@ async function setup() {
     await deleteDB();
     db = await openDB();
     await clearDogs();
+
     // Unless the database is deleted and recreated,
     // these records will be recreated with new key values.
     await createDog('Comet', 'Whippet');
     await createDog('Oscar', 'German Shorthaired Pointer');
+
     const dogs = await getAllDogs();
     console.log('dogs =', dogs);
+
+    const comet = dogs.find(dog => dog.name === 'Comet');
+    if (comet) {
+      comet.name = 'Fireball';
+      await updateDog(comet);
+    }
+
     const oscar = await getDogByKey(2);
     console.log('oscar =', oscar);
+
     const whippets = await getDogsByBreed('Whippet');
     console.log('whippets =', whippets);
+
     await deleteDog(2);
     const remainingDogs = await getAllDogs();
     console.log('remainingDogs =', remainingDogs);
