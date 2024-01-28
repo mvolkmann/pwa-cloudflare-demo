@@ -1,4 +1,5 @@
 let db;
+const dbName = 'myDB';
 const storeName = 'dogs';
 
 async function setup() {
@@ -6,13 +7,15 @@ async function setup() {
   console.log('setup.js: storage estimate =', estimate);
 
   try {
+    await deleteDB();
     db = await openDB();
     await clearDogs();
+    // Unless the database is deleted and recreated,
+    // these records will be recreated with new key values.
     await createDog('Comet', 'Whippet');
     await createDog('Oscar', 'German Shorthaired Pointer');
     const dogs = await getAllDogs();
     console.log('dogs =', dogs);
-    // TODO: Why does this only work when the database is freshly created?
     const oscar = await getDogByKey(2);
     console.log('oscar =', oscar);
     // const whippets = await getDogsByBreed('Whippet');
@@ -67,16 +70,21 @@ function requestToPromise(request, action) {
   });
 }
 
+function deleteDB() {
+  const request = indexedDB.deleteDatabase(dbName);
+  return requestToPromise(request, 'delete database');
+}
+
 function openDB() {
   const version = 1;
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('myDB', version);
+    const request = indexedDB.open(dbName, version);
 
     request.onupgradeneeded = event => {
       const db = request.result;
       const options = {autoIncrement: true, keyPath: 'id'};
       const store = db.createObjectStore(storeName, options);
-      store.createIndex('breed', ['breed'], {unique: false});
+      // store.createIndex('breed', ['breed'], {unique: false});
     };
 
     request.onsuccess = event => {
@@ -116,10 +124,8 @@ function getAllDogs(key) {
 }
 
 function getDogByKey(key) {
-  console.log('getDog: key =', key);
   const txn = db.transaction(storeName, 'readonly');
   const store = txn.objectStore(storeName);
-  console.log('setup.js getDogByKey: store.keyPath =', store.keyPath);
   const request = store.get(key);
   return requestToPromise(request, 'get dog');
 }
