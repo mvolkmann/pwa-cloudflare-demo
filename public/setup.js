@@ -18,8 +18,11 @@ async function setup() {
     console.log('dogs =', dogs);
     const oscar = await getDogByKey(2);
     console.log('oscar =', oscar);
-    // const whippets = await getDogsByBreed('Whippet');
-    // console.log('whippets =', whippets);
+    const whippets = await getDogsByBreed('Whippet');
+    console.log('whippets =', whippets);
+    await deleteDog(2);
+    const remainingDogs = await getAllDogs();
+    console.log('remainingDogs =', remainingDogs);
   } catch (error) {
     console.error('setup.js: failed to open db:', error);
   }
@@ -81,10 +84,13 @@ function openDB() {
     const request = indexedDB.open(dbName, version);
 
     request.onupgradeneeded = event => {
+      console.log('onupgradeneeded: oldversion =', event.oldversion);
+      console.log('onupgradeneeded: newversion =', event.newversion);
       const db = request.result;
+      console.log('onupgradeneeded: db version =', db.version);
       const options = {autoIncrement: true, keyPath: 'id'};
       const store = db.createObjectStore(storeName, options);
-      // store.createIndex('breed', ['breed'], {unique: false});
+      store.createIndex('breed-index', 'breed', {unique: false});
     };
 
     request.onsuccess = event => {
@@ -131,29 +137,13 @@ function getDogByKey(key) {
 }
 
 function getDogsByBreed(breed) {
-  // return new Promise((resolve, reject) => {
   const txn = db.transaction(storeName, 'readonly');
   const store = txn.objectStore(storeName);
-  const index = store.index('breed');
-  const request = index.get(breed);
+  const index = store.index('breed-index');
+  const request = index.getAll(breed);
+  // const range = IDBKeyRange.only(breed);
+  // const request = index.getAll(range);
   return requestToPromise(request, 'get dogs by breed');
-  /*
-    const dogs = [];
-    request.onsuccess = event => {
-      const cursor = event.target.result;
-      if (cursor) {
-        dogs.push(cursor.value);
-        cursor.continue();
-      } else {
-        resolve(dogs);
-      }
-    };
-    request.onerror = event => {
-      console.error('failed to use cursor');
-      reject(event);
-    };
-    */
-  //  });
 }
 
 function updateDog(newDog) {
