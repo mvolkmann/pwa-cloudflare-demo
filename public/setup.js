@@ -4,12 +4,10 @@ async function setup() {
   const estimate = await navigator.storage.estimate();
   console.log('setup.js: storage estimate =', estimate);
 
-  const dbName = 'myDB';
   const storeName = 'dogs';
 
   try {
-    await deleteDB(dbName);
-    db = await openDB(dbName, storeName);
+    db = await openDB(storeName);
     await clearStore(storeName);
 
     // Unless the database is deleted and recreated,
@@ -83,19 +81,10 @@ setup();
 
 //-----------------------------------------------------------------------------
 
-function openDB(dbName, storeName) {
+function openDB(storeName) {
   const version = 1;
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(dbName, version);
-
-    request.onupgradeneeded = event => {
-      console.log('onupgradeneeded: oldversion =', event.oldversion);
-      console.log('onupgradeneeded: newversion =', event.newversion);
-      db = request.result;
-      console.log('onupgradeneeded: db version =', db.version);
-      const store = createStore(storeName, 'id', true);
-      createIndex(store, 'breed-index', 'breed');
-    };
+    const request = indexedDB.open('myDB', version);
 
     request.onsuccess = event => {
       const db = request.result;
@@ -105,6 +94,25 @@ function openDB(dbName, storeName) {
     request.onerror = event => {
       console.error('failed to open database');
       reject(event);
+    };
+
+    request.onupgradeneeded = event => {
+      const {newVersion, oldVersion} = event;
+      if (oldVersion === 0) {
+        console.log('creating first version');
+      } else {
+        console.log('upgrading from version', oldVersion, 'to', newVersion);
+      }
+
+      db = request.result;
+      const txn = event.target.transaction;
+
+      // If the dogs store already exists, delete it.
+      const names = Array.from(txn.objectStoreNames);
+      if (names.includes(storeName)) deleteStore(storeName);
+
+      const store = createStore(storeName, 'id', true);
+      createIndex(store, 'breed-index', 'breed');
     };
   });
 }
