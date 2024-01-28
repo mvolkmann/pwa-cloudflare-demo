@@ -21,10 +21,18 @@ self.addEventListener('activate', event => {
   event.waitUntil(deleteCache(cacheName));
 });
 
-async function addDog() {
+async function addSnoopy() {
   const dog = {name: 'Snoopy', breed: 'Beagle'};
   dog.id = await createRecord('dogs', dog);
   const html = dogToTableRow(dog);
+  return new Response(html, {
+    headers: {'Content-Type': 'application/html'}
+  });
+}
+
+async function deleteSnoopy() {
+  await deleteRecordsByProperty('dogs', 'name-index', 'Snoopy');
+  const html = '';
   return new Response(html, {
     headers: {'Content-Type': 'application/html'}
   });
@@ -57,7 +65,9 @@ self.addEventListener('fetch', async event => {
       event.respondWith(getDogs());
     } else if (method === 'POST') {
       //TODO: How can you get the request body?
-      event.respondWith(addDog());
+      event.respondWith(addSnoopy());
+    } else if (method === 'DELETE') {
+      event.respondWith(deleteSnoopy());
     }
     return;
   }
@@ -185,6 +195,7 @@ function openDB(storeName) {
 
       const store = createStore(storeName, 'id', true);
       createIndex(store, 'breed-index', 'breed');
+      createIndex(store, 'name-index', 'name');
     };
   });
 }
@@ -216,6 +227,28 @@ function createRecord(storeName, object) {
 function deleteDB(dbName) {
   const request = indexedDB.deleteDatabase(dbName);
   return requestToPromise(request, 'delete database');
+}
+
+function deleteRecordsByProperty(storeName, indexName, value) {
+  return new Promise((resolve, reject) => {
+    const txn = db.transaction(storeName, 'readwrite');
+    const store = txn.objectStore(storeName);
+    const index = store.index(indexName);
+    const request = index.getAll(value);
+    request.onsuccess = event => {
+      const records = event.target.result;
+      for (const record of records) {
+        store.delete(record[store.keyPath]);
+      }
+      txn.commit();
+      resolve();
+    };
+    request.onerror = event => {
+      console.error('failed to delete records by property');
+      txn.abort();
+      reject(event);
+    };
+  });
 }
 
 function deleteRecordByKey(storeName, key) {
