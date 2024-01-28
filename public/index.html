@@ -49,6 +49,11 @@
       <span id="html"></span>
     </section>
 
+    <section>
+      <button hx-get="/dog" hx-target="#dogs">Get Dogs</button>
+      <ul id="dogs"></ul>
+    </section>
+
     <h2>Dogs</h2>
     <table>
       <tr>
@@ -58,7 +63,7 @@
       </tr>
     </table>
 
-    <h2>Pokemon</h2>
+    <!-- <h2>Pokemon</h2>
     <table
       hx-trigger="load"
       hx-get="/pokemon-rows?page=1"
@@ -71,6 +76,6 @@
         <th>Description</th>
       </tr>
     </table>
-    <img alt="loading..." class="htmx-indicator" src="/images/spinner.gif" />
+    <img alt="loading..." class="htmx-indicator" src="/images/spinner.gif" /> -->
   </body>
 </html>
