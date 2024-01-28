@@ -105,9 +105,9 @@ function openDB(storeName) {
       }
 
       db = request.result;
-      const txn = event.target.transaction;
 
-      // If the dogs store already exists, delete it.
+      // If the "dogs" store already exists, delete it.
+      const txn = event.target.transaction;
       const names = Array.from(txn.objectStoreNames);
       if (names.includes(storeName)) deleteStore(storeName);
 
