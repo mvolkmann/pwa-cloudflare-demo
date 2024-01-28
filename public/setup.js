@@ -1,4 +1,5 @@
 let db;
+const storeName = 'dogs';
 
 async function setup() {
   const estimate = await navigator.storage.estimate();
@@ -10,7 +11,12 @@ async function setup() {
     await createDog('Comet', 'Whippet');
     await createDog('Oscar', 'German Shorthaired Pointer');
     const dogs = await getAllDogs();
-    console.log('setup.js: dogs =', dogs);
+    console.log('dogs =', dogs);
+    // TODO: Why does this only work when the database is freshly created?
+    const oscar = await getDogByKey(2);
+    console.log('oscar =', oscar);
+    // const whippets = await getDogsByBreed('Whippet');
+    // console.log('whippets =', whippets);
   } catch (error) {
     console.error('setup.js: failed to open db:', error);
   }
@@ -68,10 +74,9 @@ function openDB() {
 
     request.onupgradeneeded = event => {
       const db = request.result;
-      const storeName = 'dogs';
       const options = {autoIncrement: true, keyPath: 'id'};
-      dogStore = db.createObjectStore(storeName, options);
-      dogStore.createIndex('breed', ['breed'], {unique: false});
+      const store = db.createObjectStore(storeName, options);
+      store.createIndex('breed', ['breed'], {unique: false});
     };
 
     request.onsuccess = event => {
@@ -89,44 +94,72 @@ function openDB() {
 function createStore() {}
 
 function clearDogs() {
-  const txn = db.transaction('dogs', 'readwrite');
-  const store = txn.objectStore('dogs');
+  const txn = db.transaction(storeName, 'readwrite');
+  const store = txn.objectStore(storeName);
   const request = store.clear();
   return requestToPromise(request, 'clear store');
 }
 
 function createDog(name, breed) {
-  const txn = db.transaction('dogs', 'readwrite');
-  const store = txn.objectStore('dogs');
+  const txn = db.transaction(storeName, 'readwrite');
+  const store = txn.objectStore(storeName);
   const dog = {name, breed};
   const request = store.add(dog);
   return requestToPromise(request, 'create dog');
 }
 
 function getAllDogs(key) {
-  const txn = db.transaction('dogs', 'readonly');
-  const store = txn.objectStore('dogs');
+  const txn = db.transaction(storeName, 'readonly');
+  const store = txn.objectStore(storeName);
   const request = store.getAll();
   return requestToPromise(request, 'get all dogs');
 }
 
-function getDog(key) {
-  const txn = db.transaction('dogs', 'readonly');
-  const store = txn.objectStore('dogs');
+function getDogByKey(key) {
+  console.log('getDog: key =', key);
+  const txn = db.transaction(storeName, 'readonly');
+  const store = txn.objectStore(storeName);
+  console.log('setup.js getDogByKey: store.keyPath =', store.keyPath);
   const request = store.get(key);
   return requestToPromise(request, 'get dog');
 }
 
+function getDogsByBreed(breed) {
+  // return new Promise((resolve, reject) => {
+  const txn = db.transaction(storeName, 'readonly');
+  const store = txn.objectStore(storeName);
+  const index = store.index('breed');
+  const request = index.get(breed);
+  return requestToPromise(request, 'get dogs by breed');
+  /*
+    const dogs = [];
+    request.onsuccess = event => {
+      const cursor = event.target.result;
+      if (cursor) {
+        dogs.push(cursor.value);
+        cursor.continue();
+      } else {
+        resolve(dogs);
+      }
+    };
+    request.onerror = event => {
+      console.error('failed to use cursor');
+      reject(event);
+    };
+    */
+  //  });
+}
+
 function updateDog(newDog) {
-  const txn = db.transaction('dogs', 'readwrite');
-  const store = txn.objectStore('dogs');
+  const txn = db.transaction(storeName, 'readwrite');
+  const store = txn.objectStore(storeName);
   const request = store.put(newDog);
   return requestToPromise(request, 'update dog');
 }
 
 function deleteDog(key) {
-  const txn = db.transaction('dogs', 'readwrite');
-  const store = txn.objectStore('dogs');
+  const txn = db.transaction(storeName, 'readwrite');
+  const store = txn.objectStore(storeName);
   const request = store.delete(key);
   return requestToPromise(request, 'delete dog');
 }
