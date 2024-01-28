@@ -28,7 +28,7 @@ async function setup() {
       await updateDog(comet);
     }
 
-    const oscar = await getDogByKey(2);
+    const oscar = await getRecordByKey(storeName, 2);
     console.log('oscar =', oscar);
 
     const whippets = await getDogsByBreed('Whippet');
@@ -140,11 +140,11 @@ function getAllRecords(storeName) {
   return requestToPromise(request, 'get all records');
 }
 
-function getDogByKey(key) {
+function getRecordByKey(storeName, key) {
   const txn = db.transaction(storeName, 'readonly');
   const store = txn.objectStore(storeName);
   const request = store.get(key);
-  return requestToPromise(request, 'get dog');
+  return requestToPromise(request, 'get record by key');
 }
 
 function getDogsByBreed(breed) {
