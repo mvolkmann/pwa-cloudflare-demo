@@ -45,6 +45,38 @@ async function getBodyText(request) {
   return body;
 }
 
+async function getResource(request) {
+  const log = false;
+  const url = new URL(request.url);
+  const {href, pathname} = url;
+
+  // Attempt to get from cache.
+  let resource = await caches.match(request);
+  if (resource) {
+    if (log) console.log('service worker got', href, 'from cache');
+  } else {
+    try {
+      // Get from network.
+      resource = await fetch(request);
+      if (log) console.log('service worker got', href, 'from network');
+
+      const index = pathname.lastIndexOf('.');
+      const extension = index === -1 ? '' : pathname.substring(index + 1);
+      if (fileExtensionsToCache.includes(extension)) {
+        // Save in cache for when we are offline later.
+        const cache = await caches.open(cacheName);
+        await cache.add(url);
+        if (log) console.log('service worker cached', href);
+      }
+    } catch (e) {
+      console.error('service worker failed to fetch', url);
+      resource = new Response('', {status: 404});
+    }
+  }
+
+  return resource;
+}
+
 self.addEventListener('install', event => {
   // This causes a newly installed service worker to
   // progress to the activating state, regardless of
@@ -61,46 +93,18 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', async event => {
   const {request} = event;
   const url = new URL(request.url);
-  const {href, pathname} = url;
+  const {pathname} = url;
 
+  console.log('service-worker.js fetch: request.method =', request.method);
+  console.log('service-worker.js fetch: pathname =', pathname);
   const match = router.match(request.method, pathname);
+  console.log('service-worker.js fetch: match =', match);
   if (match) {
     event.respondWith(match.handler(match.params, request));
     return;
   }
 
-  // TODO: Move this to its own function that takes a request.
-  const getResource = async () => {
-    const log = false;
-
-    // Attempt to get from cache.
-    let resource = await caches.match(request);
-    if (resource) {
-      if (log) console.log('service worker got', href, 'from cache');
-    } else {
-      try {
-        // Get from network.
-        resource = await fetch(request);
-        if (log) console.log('service worker got', href, 'from network');
-
-        const index = pathname.lastIndexOf('.');
-        const extension = index === -1 ? '' : pathname.substring(index + 1);
-        if (fileExtensionsToCache.includes(extension)) {
-          // Save in cache for when we are offline later.
-          const cache = await caches.open(cacheName);
-          await cache.add(url);
-          if (log) console.log('service worker cached', href);
-        }
-      } catch (e) {
-        console.error('service worker failed to fetch', url);
-        resource = new Response('', {status: 404});
-      }
-    }
-
-    return resource;
-  };
-
-  event.respondWith(getResource());
+  event.respondWith(getResource(request));
 });
 
 //-----------------------------------------------------------------------------
