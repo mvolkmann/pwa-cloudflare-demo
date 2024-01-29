@@ -2,7 +2,24 @@ const storeName = 'dogs';
 
 function dogToTableRow(dog) {
   const {breed, id, name} = dog;
-  return `<tr><td>${id}</td><td>${name}</td><td>${breed}</td></tr>`;
+  const idTd = el('td', id);
+  const nameTd = el('td', name);
+  const breedTd = el('td', breed);
+  const attrs = {
+    'hx-delete': `/${storeName}/${id}`,
+    'hx-target': '#dog-table-body'
+  };
+  const deleteTd = el('td', el('button', '🗑', attrs));
+  return el('tr', idTd + nameTd + breedTd + deleteTd);
+}
+
+function el(name, content, attrs = {}) {
+  let html = '<' + name;
+  for (const [key, value] of Object.entries(attrs)) {
+    html += ` ${key}="${value}"`;
+  }
+  html += `>${content}</${name}>`;
+  return html;
 }
 
 export default class Dogs {
@@ -84,9 +101,9 @@ export default class Dogs {
     });
   }
 
-  async deleteSnoopy() {
+  async deleteDog(id) {
     const ie = this.idbEasy;
-    await ie.deleteRecordsByIndex('dogs', 'name-index', 'Snoopy');
+    await ie.deleteRecordByKey('dogs', id);
     return this.getDogs();
   }
 

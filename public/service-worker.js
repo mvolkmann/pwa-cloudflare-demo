@@ -59,7 +59,9 @@ self.addEventListener('fetch', async event => {
     } else if (method === 'PUT') {
       event.respondWith(dogs.updateSnoopy());
     } else if (method === 'DELETE') {
-      event.respondWith(dogs.deleteSnoopy());
+      const id = Number(url.pathname.split('/')[2]);
+      console.log('service-worker.js delete: id =', id);
+      event.respondWith(dogs.deleteDog(id));
     }
     return;
   }
