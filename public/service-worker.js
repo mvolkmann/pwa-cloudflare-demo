@@ -85,7 +85,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(deleteCache(cacheName));
+  // event.waitUntil(deleteCache(cacheName));
 });
 
 // No fetch events are generated in the initial load of the web app.
@@ -95,10 +95,10 @@ self.addEventListener('fetch', async event => {
   const url = new URL(request.url);
   const {pathname} = url;
 
-  console.log('service-worker.js fetch: request.method =', request.method);
-  console.log('service-worker.js fetch: pathname =', pathname);
+  // console.log('service-worker.js fetch: request.method =', request.method);
+  // console.log('service-worker.js fetch: pathname =', pathname);
   const match = router.match(request.method, pathname);
-  console.log('service-worker.js fetch: match =', match);
+  // console.log('service-worker.js fetch: match =', match);
   const promise = match
     ? match.handler(match.params, request)
     : getResource(request);
