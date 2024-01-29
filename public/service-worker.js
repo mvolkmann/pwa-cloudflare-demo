@@ -78,6 +78,7 @@ async function getResource(request) {
 }
 
 self.addEventListener('install', event => {
+  console.log('service-worker.js: installing');
   // This causes a newly installed service worker to
   // progress to the activating state, regardless of
   // whether there is already an active service worker.
@@ -85,6 +86,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
+  console.log('service-worker.js: activating');
   // event.waitUntil(deleteCache(cacheName));
 });
 
@@ -112,8 +114,9 @@ let db;
 setupDatabase();
 
 async function setupDatabase() {
-  const estimate = await navigator.storage.estimate();
-  console.log('setup.js: storage estimate =', estimate);
+  // Safari says "The operation is not supported."
+  // const estimate = await navigator.storage.estimate();
+  // console.log('setup.js: storage estimate =', estimate);
 
   const storeName = 'dogs';
 
