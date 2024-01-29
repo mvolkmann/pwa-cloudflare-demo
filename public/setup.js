@@ -59,7 +59,9 @@ async function setupServiceWorker() {
   }
 
   try {
-    const reg = await navigator.serviceWorker.register('service-worker.js');
+    const reg = await navigator.serviceWorker.register('service-worker.js', {
+      type: 'module'
+    });
     console.log('service worker registered with scope', reg.scope);
 
     reg.onupdatefound = () => {

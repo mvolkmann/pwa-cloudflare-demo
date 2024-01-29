@@ -1,9 +1,10 @@
+import Dogs from './dogs.js';
 import IDBEasy from './idb-easy.js';
-
-let idbEasy;
 
 // Should this use the Workbox library?
 const cacheName = 'pwa-demo-v1';
+
+let dogs;
 
 async function deleteCache(cacheName) {
   const keys = await caches.keys();
@@ -23,43 +24,6 @@ self.addEventListener('activate', event => {
   event.waitUntil(deleteCache(cacheName));
 });
 
-async function addSnoopy() {
-  const dog = {name: 'Snoopy', breed: 'Beagle'};
-  dog.id = await idbEasy.createRecord('dogs', dog);
-  const html = dogToTableRow(dog);
-  return new Response(html, {
-    headers: {'Content-Type': 'application/html'}
-  });
-}
-
-async function deleteSnoopy() {
-  await idbEasy.deleteRecordsByIndex('dogs', 'name-index', 'Snoopy');
-  return getDogs();
-}
-
-function dogToTableRow(dog) {
-  const {breed, id, name} = dog;
-  return `<tr><td>${id}</td><td>${name}</td><td>${breed}</td></tr>`;
-}
-
-async function getDogs() {
-  const dogs = await idbEasy.getAllRecords('dogs');
-  const html = dogs.map(dogToTableRow).join('');
-  return new Response(html, {
-    headers: {'Content-Type': 'application/html'}
-  });
-}
-
-async function updateSnoopy() {
-  await idbEasy.updateRecordsByIndex(
-    'dogs',
-    'name-index',
-    'Snoopy',
-    'Woodstock'
-  );
-  return getDogs();
-}
-
 // No fetch events are generated in the initial load of the web app.
 // A second visit is required to cache all the resources.
 self.addEventListener('fetch', async event => {
@@ -71,14 +35,14 @@ self.addEventListener('fetch', async event => {
     console.log('service-worker.js fetch: got dog request');
     console.log('service-worker.js fetch: method =', method);
     if (method === 'GET') {
-      event.respondWith(getDogs());
+      event.respondWith(dogs.getDogs());
     } else if (method === 'POST') {
       //TODO: How can you get the request body?
-      event.respondWith(addSnoopy());
+      event.respondWith(dogs.addSnoopy());
     } else if (method === 'PUT') {
-      event.respondWith(updateSnoopy());
+      event.respondWith(dogs.updateSnoopy());
     } else if (method === 'DELETE') {
-      event.respondWith(deleteSnoopy());
+      event.respondWith(dogs.deleteSnoopy());
     }
     return;
   }
@@ -129,48 +93,7 @@ async function setupDatabase() {
 
   try {
     db = await openDB(storeName);
-    idbEasy = new IDBEasy(db);
     // await clearStore(storeName);
-
-    const count = await idbEasy.getRecordCount(storeName);
-    if (count === 0) {
-      // Unless the database is deleted and recreated,
-      // these records will be recreated with new key values.
-      await idbEasy.createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
-      await idbEasy.createRecord(storeName, {
-        name: 'Oscar',
-        breed: 'German Shorthaired Pointer'
-      });
-
-      const dogs = await getAllRecords(storeName);
-
-      const comet = dogs.find(dog => dog.name === 'Comet');
-      if (comet) {
-        comet.name = 'Fireball';
-        await idbEasy.upsertRecord(storeName, comet);
-      }
-
-      await idbEasy.upsertRecord(storeName, {
-        name: 'Clarice',
-        breed: 'Whippet'
-      });
-    }
-
-    /*
-    const oscar = await getRecordByKey(storeName, 2);
-    console.log('oscar =', oscar);
-
-    const whippets = await getRecordsByIndex(
-      storeName,
-      'breed-index',
-      'Whippet'
-    );
-    console.log('whippets =', whippets);
-
-    await deleteRecordByKey(storeName, 2);
-    const remainingDogs = await getAllRecords('dogs');
-    console.log('remainingDogs =', remainingDogs);
-    */
   } catch (error) {
     console.error('setup.js: failed to open db:', error);
   }
@@ -179,12 +102,15 @@ async function setupDatabase() {
 //-----------------------------------------------------------------------------
 
 function openDB(storeName) {
+  console.log('service-worker.js openDB: entered');
   const version = 1;
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('myDB', version);
 
     request.onsuccess = event => {
       const db = request.result;
+      const idbEasy = new IDBEasy(db);
+      dogs = new Dogs(idbEasy);
       resolve(db);
     };
 
@@ -193,24 +119,12 @@ function openDB(storeName) {
       reject(event);
     };
 
-    request.onupgradeneeded = event => {
-      const {newVersion, oldVersion} = event;
-      if (oldVersion === 0) {
-        console.log('creating first version');
-      } else {
-        console.log('upgrading from version', oldVersion, 'to', newVersion);
-      }
-
-      db = request.result;
-
-      // If the "dogs" store already exists, delete it.
-      const txn = event.target.transaction;
-      const names = Array.from(txn.objectStoreNames);
-      if (names.includes(storeName)) deleteStore(storeName);
-
-      const store = idbEasy.createStore(storeName, 'id', true);
-      idbEasy.createIndex(store, 'breed-index', 'breed');
-      idbEasy.createIndex(store, 'name-index', 'name');
+    request.onupgradeneeded = async event => {
+      const db = request.result;
+      const idbEasy = new IDBEasy(db);
+      dogs = new Dogs(idbEasy);
+      dogs.upgrade(event);
+      // await dogs.initialize();
     };
   });
 }
