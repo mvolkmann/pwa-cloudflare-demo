@@ -1,7 +1,7 @@
 function requestToPromise(request, action) {
   return new Promise((resolve, reject) => {
     request.onsuccess = event => {
-      console.log('succeeded to', action);
+      // console.log('succeeded to', action);
       request.transaction.commit();
       resolve(request.result);
     };
@@ -18,8 +18,8 @@ export default class IDBEasy {
     this.db = db;
   }
 
-  clearStore(storeName) {
-    const txn = this.db.transaction(storeName, 'readwrite');
+  clearStore(storeName, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readwrite');
     const store = txn.objectStore(storeName);
     const request = store.clear();
     return requestToPromise(request, 'clear store');
@@ -33,8 +33,8 @@ export default class IDBEasy {
     return this.db.createObjectStore(storeName, {autoIncrement, keyPath});
   }
 
-  createRecord(storeName, object) {
-    const txn = this.db.transaction(storeName, 'readwrite');
+  createRecord(storeName, object, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readwrite');
     const store = txn.objectStore(storeName);
     const request = store.add(object);
     return requestToPromise(request, 'create record');
@@ -45,9 +45,9 @@ export default class IDBEasy {
     return requestToPromise(request, 'delete database');
   }
 
-  deleteRecordsByIndex(storeName, indexName, value) {
+  deleteRecordsByIndex(storeName, indexName, value, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readwrite');
     return new Promise((resolve, reject) => {
-      const txn = this.db.transaction(storeName, 'readwrite');
       const store = txn.objectStore(storeName);
       const index = store.index(indexName);
       const request = index.getAll(value);
@@ -67,8 +67,8 @@ export default class IDBEasy {
     });
   }
 
-  deleteRecordByKey(storeName, key) {
-    const txn = this.db.transaction(storeName, 'readwrite');
+  deleteRecordByKey(storeName, key, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readwrite');
     const store = txn.objectStore(storeName);
     const request = store.delete(key);
     return requestToPromise(request, 'delete dog');
@@ -78,38 +78,38 @@ export default class IDBEasy {
     this.db.deleteObjectStore(storeName);
   }
 
-  getAllRecords(storeName) {
-    const txn = this.db.transaction(storeName, 'readonly');
+  getAllRecords(storeName, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readonly');
     const store = txn.objectStore(storeName);
     const request = store.getAll();
     return requestToPromise(request, 'get all records');
   }
 
-  getRecordByKey(storeName, key) {
-    const txn = this.db.transaction(storeName, 'readonly');
+  getRecordByKey(storeName, key, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readonly');
     const store = txn.objectStore(storeName);
     const request = store.get(key);
     return requestToPromise(request, 'get record by key');
   }
 
-  getRecordCount(storeName) {
-    const txn = this.db.transaction(storeName, 'readonly');
+  getRecordCount(storeName, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readonly');
     const store = txn.objectStore(storeName);
     const request = store.count();
     return requestToPromise(request, 'get record count');
   }
 
-  getRecordsByIndex(storeName, indexName, indexValue) {
-    const txn = this.db.transaction(storeName, 'readonly');
+  getRecordsByIndex(storeName, indexName, indexValue, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readonly');
     const store = txn.objectStore(storeName);
     const index = store.index(indexName);
     const request = index.getAll(indexValue);
     return requestToPromise(request, 'get records by index');
   }
 
-  updateRecordsByIndex(storeName, indexName, oldValue, newValue) {
+  updateRecordsByIndex(storeName, indexName, oldValue, newValue, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readwrite');
     return new Promise((resolve, reject) => {
-      const txn = this.db.transaction(storeName, 'readwrite');
       const store = txn.objectStore(storeName);
       const index = store.index(indexName);
       const request = index.getAll(oldValue);
@@ -130,8 +130,8 @@ export default class IDBEasy {
     });
   }
 
-  upsertRecord(storeName, object) {
-    const txn = this.db.transaction(storeName, 'readwrite');
+  upsertRecord(storeName, object, txn) {
+    if (!txn) txn = this.db.transaction(storeName, 'readwrite');
     const store = txn.objectStore(storeName);
     const request = store.put(object);
     return requestToPromise(request, 'update dog');

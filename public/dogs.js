@@ -69,6 +69,7 @@ export default class Dogs {
     const names = Array.from(txn.objectStoreNames);
     if (names.includes(storeName)) ie.deleteStore(storeName);
 
+    // Recreate the "dogs" store and its indexes.
     const store = ie.createStore(storeName, 'id', true);
     ie.createIndex(store, 'breed-index', 'breed');
     ie.createIndex(store, 'name-index', 'name');

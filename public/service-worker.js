@@ -107,10 +107,9 @@ function openDB(storeName) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('myDB', version);
 
-    request.onsuccess = event => {
+    request.onsuccess = async event => {
       const db = request.result;
-      const idbEasy = new IDBEasy(db);
-      dogs = new Dogs(idbEasy);
+      dogs = new Dogs(new IDBEasy(db));
       resolve(db);
     };
 
@@ -121,10 +120,12 @@ function openDB(storeName) {
 
     request.onupgradeneeded = async event => {
       const db = request.result;
-      const idbEasy = new IDBEasy(db);
-      dogs = new Dogs(idbEasy);
+      dogs = new Dogs(new IDBEasy(db));
       dogs.upgrade(event);
-      // await dogs.initialize();
+      // Wait for upgrade transaction to complete.
+      setTimeout(() => {
+        dogs.initialize();
+      }, 100);
     };
   });
 }
