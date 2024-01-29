@@ -2,6 +2,7 @@ const storeName = 'dogs';
 
 function dogToTableRow(dog) {
   const {breed, id, name} = dog;
+  /*
   const idTd = el('td', id);
   const nameTd = el('td', name);
   const breedTd = el('td', breed);
@@ -12,6 +13,23 @@ function dogToTableRow(dog) {
   };
   const deleteTd = el('td', el('button', '🗑', attrs));
   return el('tr', idTd + nameTd + breedTd + deleteTd);
+  */
+  return `
+    <tr>
+      <td>${id}</td>
+      <td>${name}</td>
+      <td>${breed}</td>
+      <td>
+        <button
+          hx-confirm="Are you sure?"
+          hx-delete="/dog/${id}"
+          hx-target="#dog-table-body"
+        >
+          🗑
+        </button>
+      </td>
+    </tr>
+  `;
 }
 
 // TODO: Find a better HTML templating approach.
