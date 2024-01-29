@@ -75,8 +75,7 @@ export default class Dogs {
     ie.createIndex(store, 'name-index', 'name');
   }
 
-  async addSnoopy() {
-    const dog = {name: 'Snoopy', breed: 'Beagle'};
+  async addDog(dog) {
     const ie = this.idbEasy;
     dog.id = await ie.createRecord('dogs', dog);
     const html = dogToTableRow(dog);

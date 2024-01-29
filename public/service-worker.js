@@ -6,11 +6,29 @@ const cacheName = 'pwa-demo-v1';
 
 let dogs;
 
+async function addDog(request) {
+  const formData = await request.formData();
+  const dog = Object.fromEntries(formData);
+  return dogs.addDog(dog);
+}
+
 async function deleteCache(cacheName) {
   const keys = await caches.keys();
   return Promise.all(
     keys.map(key => (key === cacheName ? null : caches.delete(key)))
   );
+}
+
+async function getBodyText(request) {
+  const reader = request.body.getReader();
+  let body = '';
+  while (true) {
+    const {done, value} = await reader.read();
+    const text = new TextDecoder().decode(value);
+    body += text;
+    if (done) break;
+  }
+  return body;
 }
 
 self.addEventListener('install', event => {
@@ -37,8 +55,7 @@ self.addEventListener('fetch', async event => {
     if (method === 'GET') {
       event.respondWith(dogs.getDogs());
     } else if (method === 'POST') {
-      //TODO: How can you get the request body?
-      event.respondWith(dogs.addSnoopy());
+      event.respondWith(addDog(request));
     } else if (method === 'PUT') {
       event.respondWith(dogs.updateSnoopy());
     } else if (method === 'DELETE') {

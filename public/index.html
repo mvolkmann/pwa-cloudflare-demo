@@ -50,7 +50,7 @@
     </section>
 
     <section>
-      <form>
+      <form hx-post="/dog" hx-target="#dog-table-body" hx-swap="beforeend">
         <div>
           <label for="name">Name</label>
           <input id="name" name="name" type="text" />
@@ -59,9 +59,7 @@
           <label for="breed">Breed</label>
           <input id="breed" name="breed" type="text" />
         </div>
-        <button hx-post="/dog" hx-target="#dog-table-body" hx-swap="beforeend">
-          Submit
-        </button>
+        <button>Submit</button>
       </form>
 
       <div>
