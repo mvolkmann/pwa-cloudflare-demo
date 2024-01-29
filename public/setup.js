@@ -34,39 +34,3 @@ async function setupServiceWorker() {
     console.error('service worker registered failed:', error);
   }
 }
-
-//-----------------------------------------------------------------------------
-
-function openDB(storeName) {
-  const version = 1;
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('myDB', version);
-
-    request.onsuccess = event => {
-      const db = request.result;
-      resolve(db);
-    };
-
-    request.onerror = event => {
-      console.error('failed to open database');
-      reject(event);
-    };
-
-    request.onupgradeneeded = event => {
-      const {newVersion, oldVersion} = event;
-      if (oldVersion === 0) {
-        console.log('creating first version');
-      } else {
-        console.log('upgrading from version', oldVersion, 'to', newVersion);
-      }
-
-      // If the "dogs" store already exists, delete it.
-      const txn = event.target.transaction;
-      const names = Array.from(txn.objectStoreNames);
-      if (names.includes(storeName)) deleteStore(storeName);
-
-      const store = createStore(storeName, 'id', true);
-      createIndex(store, 'breed-index', 'breed');
-    };
-  });
-}
