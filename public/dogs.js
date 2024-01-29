@@ -6,6 +6,7 @@ function dogToTableRow(dog) {
   const nameTd = el('td', name);
   const breedTd = el('td', breed);
   const attrs = {
+    'hx-confirm': 'Are you sure?',
     'hx-delete': `/${storeName}/${id}`,
     'hx-target': '#dog-table-body'
   };
