@@ -1,4 +1,6 @@
-console.log('ENTERED service-worker.js');
+import IDBEasy from './idb-easy.js';
+
+let idbEasy;
 
 // Should this use the Workbox library?
 const cacheName = 'pwa-demo-v1';
@@ -23,7 +25,7 @@ self.addEventListener('activate', event => {
 
 async function addSnoopy() {
   const dog = {name: 'Snoopy', breed: 'Beagle'};
-  dog.id = await createRecord('dogs', dog);
+  dog.id = await idbEasy.createRecord('dogs', dog);
   const html = dogToTableRow(dog);
   return new Response(html, {
     headers: {'Content-Type': 'application/html'}
@@ -31,7 +33,7 @@ async function addSnoopy() {
 }
 
 async function deleteSnoopy() {
-  await deleteRecordsByIndex('dogs', 'name-index', 'Snoopy');
+  await idbEasy.deleteRecordsByIndex('dogs', 'name-index', 'Snoopy');
   return getDogs();
 }
 
@@ -41,7 +43,7 @@ function dogToTableRow(dog) {
 }
 
 async function getDogs() {
-  const dogs = await getAllRecords('dogs');
+  const dogs = await idbEasy.getAllRecords('dogs');
   const html = dogs.map(dogToTableRow).join('');
   return new Response(html, {
     headers: {'Content-Type': 'application/html'}
@@ -49,7 +51,12 @@ async function getDogs() {
 }
 
 async function updateSnoopy() {
-  await updateRecordsByIndex('dogs', 'name-index', 'Snoopy', 'Woodstock');
+  await idbEasy.updateRecordsByIndex(
+    'dogs',
+    'name-index',
+    'Snoopy',
+    'Woodstock'
+  );
   return getDogs();
 }
 
@@ -122,14 +129,15 @@ async function setupDatabase() {
 
   try {
     db = await openDB(storeName);
+    idbEasy = new IDBEasy(db);
     // await clearStore(storeName);
 
-    const count = await getRecordCount(storeName);
+    const count = await idbEasy.getRecordCount(storeName);
     if (count === 0) {
       // Unless the database is deleted and recreated,
       // these records will be recreated with new key values.
-      await createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
-      await createRecord(storeName, {
+      await idbEasy.createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
+      await idbEasy.createRecord(storeName, {
         name: 'Oscar',
         breed: 'German Shorthaired Pointer'
       });
@@ -139,10 +147,13 @@ async function setupDatabase() {
       const comet = dogs.find(dog => dog.name === 'Comet');
       if (comet) {
         comet.name = 'Fireball';
-        await upsertRecord(storeName, comet);
+        await idbEasy.upsertRecord(storeName, comet);
       }
 
-      await upsertRecord(storeName, {name: 'Clarice', breed: 'Whippet'});
+      await idbEasy.upsertRecord(storeName, {
+        name: 'Clarice',
+        breed: 'Whippet'
+      });
     }
 
     /*
@@ -197,145 +208,9 @@ function openDB(storeName) {
       const names = Array.from(txn.objectStoreNames);
       if (names.includes(storeName)) deleteStore(storeName);
 
-      const store = createStore(storeName, 'id', true);
-      createIndex(store, 'breed-index', 'breed');
-      createIndex(store, 'name-index', 'name');
+      const store = idbEasy.createStore(storeName, 'id', true);
+      idbEasy.createIndex(store, 'breed-index', 'breed');
+      idbEasy.createIndex(store, 'name-index', 'name');
     };
   });
-}
-
-//-----------------------------------------------------------------------------
-
-function clearStore(storeName) {
-  const txn = db.transaction(storeName, 'readwrite');
-  const store = txn.objectStore(storeName);
-  const request = store.clear();
-  return requestToPromise(request, 'clear store');
-}
-
-function createIndex(store, indexName, keyPath, unique = false) {
-  store.createIndex(indexName, keyPath, {unique});
-}
-
-function createStore(storeName, keyPath, autoIncrement = false) {
-  return db.createObjectStore(storeName, {autoIncrement, keyPath});
-}
-
-function createRecord(storeName, object) {
-  const txn = db.transaction(storeName, 'readwrite');
-  const store = txn.objectStore(storeName);
-  const request = store.add(object);
-  return requestToPromise(request, 'create record');
-}
-
-function deleteDB(dbName) {
-  const request = indexedDB.deleteDatabase(dbName);
-  return requestToPromise(request, 'delete database');
-}
-
-function deleteRecordsByIndex(storeName, indexName, value) {
-  return new Promise((resolve, reject) => {
-    const txn = db.transaction(storeName, 'readwrite');
-    const store = txn.objectStore(storeName);
-    const index = store.index(indexName);
-    const request = index.getAll(value);
-    request.onsuccess = event => {
-      const records = event.target.result;
-      for (const record of records) {
-        store.delete(record[store.keyPath]);
-      }
-      txn.commit();
-      resolve();
-    };
-    request.onerror = event => {
-      console.error('failed to delete records by index');
-      txn.abort();
-      reject(event);
-    };
-  });
-}
-
-function deleteRecordByKey(storeName, key) {
-  const txn = db.transaction(storeName, 'readwrite');
-  const store = txn.objectStore(storeName);
-  const request = store.delete(key);
-  return requestToPromise(request, 'delete dog');
-}
-
-function deleteStore(storeName) {
-  db.deleteObjectStore(storeName);
-}
-
-function getAllRecords(storeName) {
-  const txn = db.transaction(storeName, 'readonly');
-  const store = txn.objectStore(storeName);
-  const request = store.getAll();
-  return requestToPromise(request, 'get all records');
-}
-
-function getRecordByKey(storeName, key) {
-  const txn = db.transaction(storeName, 'readonly');
-  const store = txn.objectStore(storeName);
-  const request = store.get(key);
-  return requestToPromise(request, 'get record by key');
-}
-
-function getRecordCount(storeName) {
-  const txn = db.transaction(storeName, 'readonly');
-  const store = txn.objectStore(storeName);
-  const request = store.count();
-  return requestToPromise(request, 'get record count');
-}
-
-function getRecordsByIndex(storeName, indexName, indexValue) {
-  const txn = db.transaction(storeName, 'readonly');
-  const store = txn.objectStore(storeName);
-  const index = store.index(indexName);
-  const request = index.getAll(indexValue);
-  return requestToPromise(request, 'get records by index');
-}
-
-function requestToPromise(request, action) {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = event => {
-      console.log('succeeded to', action);
-      request.transaction.commit();
-      resolve(request.result);
-    };
-    request.onerror = event => {
-      console.error('failed to', action);
-      request.transaction.abort();
-      reject(event);
-    };
-  });
-}
-
-function updateRecordsByIndex(storeName, indexName, oldValue, newValue) {
-  return new Promise((resolve, reject) => {
-    const txn = db.transaction(storeName, 'readwrite');
-    const store = txn.objectStore(storeName);
-    const index = store.index(indexName);
-    const request = index.getAll(oldValue);
-    request.onsuccess = event => {
-      const records = event.target.result;
-      for (const record of records) {
-        record[index.keyPath] = newValue;
-        store.put(record);
-      }
-      txn.commit();
-      resolve();
-    };
-    request.onerror = event => {
-      console.error('failed to update records by index');
-      txn.abort();
-      reject(event);
-    };
-  });
-}
-
-function upsertRecord(storeName, object) {
-  const txn = db.transaction(storeName, 'readwrite');
-  const store = txn.objectStore(storeName);
-  const request = store.put(object);
-  return requestToPromise(request, 'update dog');
 }
