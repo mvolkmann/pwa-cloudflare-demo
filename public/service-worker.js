@@ -2,7 +2,9 @@ import {Router} from './tiny-request-router.mjs';
 import Dogs from './dogs.js';
 import IDBEasy from './idb-easy.js';
 
-const fileExtensionsToCache = ['css', 'jpg', 'js', 'json', 'png', 'webp'];
+// We aren't currently caching .css files because we want
+// changes to be reflected without clearing the cache.
+const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
 const router = new Router();
 router.get('/hello', () => new Response('Hello from service worker!'));
@@ -69,17 +71,17 @@ self.addEventListener('fetch', async event => {
 
   // TODO: Move this to its own function that takes a request.
   const getResource = async () => {
-    let resource;
+    const log = false;
 
-    // Get from cache.
-    resource = await caches.match(request);
+    // Attempt to get from cache.
+    let resource = await caches.match(request);
     if (resource) {
-      console.log('service worker got', href, 'from cache');
+      if (log) console.log('service worker got', href, 'from cache');
     } else {
       try {
         // Get from network.
         resource = await fetch(request);
-        console.log('service worker got', href, 'from network');
+        if (log) console.log('service worker got', href, 'from network');
 
         const index = pathname.lastIndexOf('.');
         const extension = index === -1 ? '' : pathname.substring(index + 1);
@@ -87,7 +89,7 @@ self.addEventListener('fetch', async event => {
           // Save in cache for when we are offline later.
           const cache = await caches.open(cacheName);
           await cache.add(url);
-          console.log('service worker cached', href);
+          if (log) console.log('service worker cached', href);
         }
       } catch (e) {
         console.error('service worker failed to fetch', url);

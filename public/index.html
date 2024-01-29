@@ -28,7 +28,14 @@
     <script src="setup.js"></script>
   </head>
   <body>
-    <h1>PWA Demo</h1>
+    <h1
+      x-data="{ status: 'online' }"
+      x-on:online.window="status = 'online'"
+      x-on:offline.window="status = 'offline'"
+    >
+      PWA Demo -
+      <span x-bind:class="status" x-text="status"></span>
+    </h1>
 
     <section>
       <h2>Alpine Counter</h2>

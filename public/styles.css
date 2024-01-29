@@ -47,6 +47,13 @@ label {
   font-weight: bold;
 }
 
+.offline {
+  color: red;
+}
+.online {
+  color: green;
+}
+
 section {
   margin-bottom: 1rem;
 }
