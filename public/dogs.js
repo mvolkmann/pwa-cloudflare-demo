@@ -7,13 +7,14 @@ function dogToTableRow(dog) {
   const breedTd = el('td', breed);
   const attrs = {
     'hx-confirm': 'Are you sure?',
-    'hx-delete': `/${storeName}/${id}`,
+    'hx-delete': `/dog/${id}`,
     'hx-target': '#dog-table-body'
   };
   const deleteTd = el('td', el('button', '🗑', attrs));
   return el('tr', idTd + nameTd + breedTd + deleteTd);
 }
 
+// TODO: Find a better HTML templating approach.
 function el(name, content, attrs = {}) {
   let html = '<' + name;
   for (const [key, value] of Object.entries(attrs)) {

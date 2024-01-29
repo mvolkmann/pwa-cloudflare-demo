@@ -2,6 +2,7 @@ function requestToPromise(request, action) {
   return new Promise((resolve, reject) => {
     request.onsuccess = event => {
       // console.log('succeeded to', action);
+      // TODO: Don't commit if a txn was passed in to caller of this!
       request.transaction.commit();
       resolve(request.result);
     };

@@ -8,7 +8,8 @@
     "reinstall": "rm -rf node_modules bun.lockb && bun install"
   },
   "dependencies": {
-    "hono": "^3.12.7"
+    "hono": "^3.12.7",
+    "tiny-request-router": "^1.2.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",

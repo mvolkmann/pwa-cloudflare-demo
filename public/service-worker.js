@@ -1,12 +1,22 @@
+import {Router} from './tiny-request-router.mjs';
 import Dogs from './dogs.js';
 import IDBEasy from './idb-easy.js';
 
-// Should this use the Workbox library?
+const router = new Router();
+router.get('/hello', () => new Response('Hello from service worker!'));
+router.get('/dog', () => dogs.getDogs());
+router.post('/dog', addDog);
+router.put('/dog', () => dogs.updateSnoopy());
+router.delete('/dog/:id', params => {
+  const id = Number(params.id);
+  return dogs.deleteDog(id);
+});
+
 const cacheName = 'pwa-demo-v1';
 
 let dogs;
 
-async function addDog(request) {
+async function addDog(params, request) {
   const formData = await request.formData();
   const dog = Object.fromEntries(formData);
   return dogs.addDog(dog);
@@ -46,26 +56,14 @@ self.addEventListener('activate', event => {
 // A second visit is required to cache all the resources.
 self.addEventListener('fetch', async event => {
   const {request} = event;
-
-  const {method} = request;
   const url = new URL(request.url);
-  if (url.pathname.startsWith('/dog')) {
-    console.log('service-worker.js fetch: got dog request');
-    console.log('service-worker.js fetch: method =', method);
-    if (method === 'GET') {
-      event.respondWith(dogs.getDogs());
-    } else if (method === 'POST') {
-      event.respondWith(addDog(request));
-    } else if (method === 'PUT') {
-      event.respondWith(dogs.updateSnoopy());
-    } else if (method === 'DELETE') {
-      const id = Number(url.pathname.split('/')[2]);
-      console.log('service-worker.js delete: id =', id);
-      event.respondWith(dogs.deleteDog(id));
-    }
+  const match = router.match(request.method, url.pathname);
+  if (match) {
+    event.respondWith(match.handler(match.params, request));
     return;
   }
 
+  // TODO: Move this to its own function that takes a request.
   const getResource = async () => {
     const {url} = request;
     let resource;
@@ -74,7 +72,7 @@ self.addEventListener('fetch', async event => {
     // Get from cache.
     resource = await caches.match(request);
     if (resource) {
-      // console.log('service worker got', url, 'from cache');
+      console.log('service worker got', url, 'from cache');
     } else {
     */
     try {
