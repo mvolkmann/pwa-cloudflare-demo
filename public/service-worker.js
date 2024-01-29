@@ -99,12 +99,10 @@ self.addEventListener('fetch', async event => {
   console.log('service-worker.js fetch: pathname =', pathname);
   const match = router.match(request.method, pathname);
   console.log('service-worker.js fetch: match =', match);
-  if (match) {
-    event.respondWith(match.handler(match.params, request));
-    return;
-  }
-
-  event.respondWith(getResource(request));
+  const promise = match
+    ? match.handler(match.params, request)
+    : getResource(request);
+  event.respondWith(promise);
 });
 
 //-----------------------------------------------------------------------------
