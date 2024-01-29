@@ -2,6 +2,8 @@ import {Router} from './tiny-request-router.mjs';
 import Dogs from './dogs.js';
 import IDBEasy from './idb-easy.js';
 
+const fileExtensionsToCache = ['css', 'jpg', 'js', 'json', 'png', 'webp'];
+
 const router = new Router();
 router.get('/hello', () => new Response('Hello from service worker!'));
 router.get('/dog', () => dogs.getDogs());
@@ -57,7 +59,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', async event => {
   const {request} = event;
   const url = new URL(request.url);
-  const match = router.match(request.method, url.pathname);
+  const {href, pathname} = url;
+
+  const match = router.match(request.method, pathname);
   if (match) {
     event.respondWith(match.handler(match.params, request));
     return;
@@ -65,30 +69,31 @@ self.addEventListener('fetch', async event => {
 
   // TODO: Move this to its own function that takes a request.
   const getResource = async () => {
-    const {url} = request;
     let resource;
 
-    /*
     // Get from cache.
     resource = await caches.match(request);
     if (resource) {
-      console.log('service worker got', url, 'from cache');
+      console.log('service worker got', href, 'from cache');
     } else {
-    */
-    try {
-      // Get from network.
-      resource = await fetch(request);
-      console.log('service worker got', url, 'from network');
+      try {
+        // Get from network.
+        resource = await fetch(request);
+        console.log('service worker got', href, 'from network');
 
-      // Save in cache for when we are offline later.
-      // const cache = await caches.open(cacheName);
-      // await cache.add(url);
-      // console.log('service worker cached', url);
-    } catch (e) {
-      console.error('service worker failed to get', url);
-      resource = new Response('', {status: 404});
+        const index = pathname.lastIndexOf('.');
+        const extension = index === -1 ? '' : pathname.substring(index + 1);
+        if (fileExtensionsToCache.includes(extension)) {
+          // Save in cache for when we are offline later.
+          const cache = await caches.open(cacheName);
+          await cache.add(url);
+          console.log('service worker cached', href);
+        }
+      } catch (e) {
+        console.error('service worker failed to fetch', url);
+        resource = new Response('', {status: 404});
+      }
     }
-    // }
 
     return resource;
   };
