@@ -13,6 +13,7 @@ async function setupServiceWorker() {
     });
     console.log('service worker registered with scope', reg.scope);
 
+    // TODO: Should you care about these state changes?
     reg.onupdatefound = () => {
       const newSW = reg.installing;
       newSW.addEventListener('statechange', event => {
