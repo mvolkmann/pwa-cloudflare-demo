@@ -35,6 +35,7 @@ input {
 
 h1 {
   color: orange;
+  margin-top: 0;
 }
 
 .htmx-indicator {
@@ -52,6 +53,11 @@ label {
 }
 .online {
   color: green;
+}
+
+#reload {
+  background-color: transparent;
+  font-size: 3rem;
 }
 
 section {

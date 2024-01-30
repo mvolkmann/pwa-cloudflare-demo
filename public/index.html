@@ -35,6 +35,12 @@
     >
       PWA Demo -
       <span x-bind:class="status" x-text="status"></span>
+      <button
+        id="reload"
+        x-on:click="console.log('reloading'); location.reload()"
+      >
+        ⟳
+      </button>
     </h1>
 
     <section>

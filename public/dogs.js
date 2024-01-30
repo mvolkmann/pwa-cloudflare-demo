@@ -25,47 +25,60 @@ export default class Dogs {
     this.idbEasy = idbEasy;
   }
 
-  async initialize() {
+  async initialize(txn) {
     const ie = this.idbEasy;
-    const count = await ie.getRecordCount(storeName);
-    if (count === 0) {
+    try {
+      const count = await ie.getRecordCount(storeName, txn);
+      console.log('dogs.js initialize: count =', count);
+      if (count > 0) return;
+
       // Unless the database is deleted and recreated,
       // these records will be recreated with new key values.
-      await ie.createRecord(storeName, {name: 'Comet', breed: 'Whippet'});
-      await ie.createRecord(storeName, {
-        name: 'Oscar',
-        breed: 'German Shorthaired Pointer'
-      });
+      await ie.createRecord(storeName, {name: 'Comet', breed: 'Whippet'}, txn);
+      await ie.createRecord(
+        storeName,
+        {
+          name: 'Oscar',
+          breed: 'German Shorthaired Pointer'
+        },
+        txn
+      );
 
-      const dogs = await ie.getAllRecords(storeName);
-
+      const dogs = await ie.getAllRecords(storeName, txn);
       const comet = dogs.find(dog => dog.name === 'Comet');
       if (comet) {
         comet.name = 'Fireball';
-        await ie.upsertRecord(storeName, comet);
+        await ie.upsertRecord(storeName, comet, txn);
       }
 
-      await ie.upsertRecord(storeName, {
-        name: 'Clarice',
-        breed: 'Whippet'
-      });
+      await ie.upsertRecord(
+        storeName,
+        {
+          name: 'Clarice',
+          breed: 'Whippet'
+        },
+        txn
+      );
+
+      /*
+      const oscar = await ie.getRecordByKey(storeName, 2, txn);
+      console.log('oscar =', oscar);
+
+      const whippets = await ie.getRecordsByIndex(
+        storeName,
+        'breed-index',
+        'Whippet',
+        txn
+      );
+      console.log('whippets =', whippets);
+
+      await ie.deleteRecordByKey(storeName, 2, txn);
+      const remainingDogs = await ie.getAllRecords('dogs', txn);
+      console.log('remainingDogs =', remainingDogs);
+      */
+    } catch (error) {
+      console.error('dogs.js initialize: error =', error);
     }
-
-    /*
-    const oscar = await ie.getRecordByKey(storeName, 2);
-    console.log('oscar =', oscar);
-
-    const whippets = await ie.getRecordsByIndex(
-      storeName,
-      'breed-index',
-      'Whippet'
-    );
-    console.log('whippets =', whippets);
-
-    await ie.deleteRecordByKey(storeName, 2);
-    const remainingDogs = await ie.getAllRecords('dogs');
-    console.log('remainingDogs =', remainingDogs);
-    */
   }
 
   upgrade(event) {
@@ -87,6 +100,8 @@ export default class Dogs {
     const store = ie.createStore(storeName, 'id', true);
     ie.createIndex(store, 'breed-index', 'breed');
     ie.createIndex(store, 'name-index', 'name');
+
+    return this.initialize(txn);
   }
 
   async addDog(dog) {

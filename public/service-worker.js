@@ -2,20 +2,37 @@ import {Router} from './tiny-request-router.mjs';
 import Dogs from './dogs.js';
 import IDBEasy from './idb-easy.js';
 
+const dbName = 'myDB';
+const version = 1;
+
 // We aren't currently caching .css files because we want
 // changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
-let dogs;
+async function getDogs() {
+  const db = await IDBEasy.openDB(dbName, version);
+  return new Dogs(new IDBEasy(db));
+}
 
 const router = new Router();
+
 router.get('/hello', () => new Response('Hello from service worker!'));
-router.get('/dog', () => dogs?.getDogs());
+
+router.get('/dog', async () => {
+  const dogs = await getDogs();
+  return dogs.getDogs();
+});
+
 router.post('/dog', addDog);
-router.put('/dog', () => dogs?.updateSnoopy());
-router.delete('/dog/:id', params => {
-  const id = Number(params.id);
-  return dogs?.deleteDog(id);
+
+router.put('/dog', async () => {
+  const dogs = await getDogs();
+  return dogs.updateSnoopy();
+});
+
+router.delete('/dog/:id', async params => {
+  const dogs = await getDogs();
+  return dogs.deleteDog(Number(params.id));
 });
 
 const cacheName = 'pwa-demo-v1';
@@ -23,7 +40,8 @@ const cacheName = 'pwa-demo-v1';
 async function addDog(params, request) {
   const formData = await request.formData();
   const dog = Object.fromEntries(formData);
-  return dogs?.addDog(dog);
+  const dogs = await getDogs();
+  return dogs.addDog(dog);
 }
 
 async function deleteCache(cacheName) {
@@ -85,13 +103,25 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
+self.addEventListener('activate', async event => {
   console.log('service-worker.js: activating');
   // event.waitUntil(deleteCache(cacheName));
+
+  // Safari says "The operation is not supported."
+  // const estimate = await navigator.storage.estimate();
+  // console.log('setup.js: storage estimate =', estimate);
+
+  try {
+    await IDBEasy.openDB(dbName, version, (db, event) => {
+      const dogs = new Dogs(new IDBEasy(db));
+      return dogs.upgrade(event);
+    });
+    // await clearStore(storeName);
+  } catch (error) {
+    console.error('setup.js: failed to open database:', error);
+  }
 });
 
-// No fetch events are generated in the initial load of the web app.
-// A second visit is required to cache all the resources.
 self.addEventListener('fetch', async event => {
   const {request} = event;
   const url = new URL(request.url);
@@ -103,30 +133,3 @@ self.addEventListener('fetch', async event => {
     : getResource(request);
   event.respondWith(promise);
 });
-
-//-----------------------------------------------------------------------------
-
-setupDatabase();
-
-async function setupDatabase() {
-  // Safari says "The operation is not supported."
-  // const estimate = await navigator.storage.estimate();
-  // console.log('setup.js: storage estimate =', estimate);
-
-  const dbName = 'myDB';
-  const version = 1;
-
-  try {
-    await IDBEasy.openDB(dbName, version, (db, event) => {
-      dogs = new Dogs(new IDBEasy(db));
-      dogs.upgrade(event);
-      // Wait for upgrade transaction to complete.
-      setTimeout(() => {
-        dogs.initialize();
-      }, 100);
-    });
-    // await clearStore(storeName);
-  } catch (error) {
-    console.error('setup.js: failed to open database:', error);
-  }
-}

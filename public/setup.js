@@ -17,13 +17,15 @@ async function setupServiceWorker() {
         switch (newSW.state) {
           case 'installed':
             if (navigator.serviceWorker.controller) {
-              console.log('update is available.');
+              console.log('setup.js: update is available');
             } else {
-              console.log('content is cached for offline use');
+              console.log('setup.js: content is cached for offline use');
             }
             break;
           case 'redundant':
-            console.error('installing service worker became redundant');
+            console.error(
+              'setup.js: installing service worker became redundant'
+            );
             break;
         }
       });
@@ -39,6 +41,12 @@ setupServiceWorker();
 // before the service worker is registered.
 // This reloads the page after the service worker is registered
 // so the request can be resent.
+let reloaded = false;
 navigator.serviceWorker.ready.then(reg => {
-  location.reload();
+  console.log('setup.js: reg =', reg);
+  if (reloaded) return;
+  if (reg.active) {
+    location.reload();
+    reloaded = true;
+  }
 });
