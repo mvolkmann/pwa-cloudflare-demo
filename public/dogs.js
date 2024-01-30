@@ -1,36 +1,23 @@
-import {el} from './js2html.js';
+import {button, div, p, table, td, th, tr} from './js2html.js';
 const storeName = 'dogs';
 
 function dogToTableRow(dog) {
   const {breed, id, name} = dog;
-  const idTd = el('td', id);
-  const nameTd = el('td', name);
-  const breedTd = el('td', breed);
-  const attrs = {
-    'hx-confirm': 'Are you sure?',
-    'hx-delete': `/dog/${id}`,
-    'hx-target': '#dog-table-body'
-  };
-  const deleteTd = el('td', el('button', '🗑', attrs));
-  return el('tr', idTd + nameTd + breedTd + deleteTd);
-  /*
-  return `
-    <tr>
-      <td>${id}</td>
-      <td>${name}</td>
-      <td>${breed}</td>
-      <td>
-        <button
-          hx-confirm="Are you sure?"
-          hx-delete="/dog/${id}"
-          hx-target="#dog-table-body"
-        >
-          🗑
-        </button>
-      </td>
-    </tr>
-  `;
-  */
+  return tr([
+    td(id),
+    td(name),
+    td(breed),
+    td(
+      button(
+        {
+          'hx-confirm': 'Are you sure?',
+          'hx-delete': `/dog/${id}`,
+          'hx-target': '#dog-table-body'
+        },
+        '🗑'
+      )
+    )
+  ]);
 }
 
 export default class Dogs {
@@ -39,10 +26,8 @@ export default class Dogs {
   }
 
   async initialize() {
-    console.log('dogs.js initialize: entered');
     const ie = this.idbEasy;
     const count = await ie.getRecordCount(storeName);
-    console.log('dogs.js initialize: count =', count);
     if (count === 0) {
       // Unless the database is deleted and recreated,
       // these records will be recreated with new key values.

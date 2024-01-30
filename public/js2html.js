@@ -32,7 +32,7 @@ export function el(name, attrs, children) {
   return html;
 }
 
-// Generates an HTML string for an element without a close tag.
+// Generates an HTML string for a self-closing element.
 export function elc(name, attrs) {
   // Begin the tag.
   let html = '<' + name;
@@ -49,3 +49,12 @@ export function elc(name, attrs) {
 
   return html;
 }
+
+export const button = (attrs, children) => el('button', attrs, children);
+export const div = (attrs, children) => el('div', attrs, children);
+export const img = (attrs, children) => elc('img', attrs);
+export const p = (attrs, children) => el('p', attrs, children);
+export const table = (attrs, children) => el('table', attrs, children);
+export const td = (attrs, children) => el('td', attrs, children);
+export const th = (attrs, children) => el('th', attrs, children);
+export const tr = (attrs, children) => el('tr', attrs, children);
