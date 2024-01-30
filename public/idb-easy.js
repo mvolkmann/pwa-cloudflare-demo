@@ -42,7 +42,7 @@ export default class IDBEasy {
     return requestToPromise(request, 'create record');
   }
 
-  deleteDB(dbName) {
+  static deleteDB(dbName) {
     const request = indexedDB.deleteDatabase(dbName);
     return requestToPromise(request, 'delete database');
   }
@@ -107,6 +107,28 @@ export default class IDBEasy {
     const index = store.index(indexName);
     const request = index.getAll(indexValue);
     return requestToPromise(request, 'get records by index');
+  }
+
+  static openDB(dbName, version, upgrade) {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(dbName, version);
+
+      request.onsuccess = async event => {
+        const db = request.result;
+        resolve(db);
+      };
+
+      request.onerror = event => {
+        console.error(`failed to open database ${dbName}`);
+        reject(event);
+      };
+
+      request.onupgradeneeded = async event => {
+        console.log('idb-easy.js onupgradeneeded: entered');
+        const db = request.result;
+        upgrade(db, event);
+      };
+    });
   }
 
   updateRecordsByIndex(storeName, indexName, oldValue, newValue, txn) {

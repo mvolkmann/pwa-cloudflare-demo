@@ -1,5 +1,3 @@
-setupServiceWorker();
-
 async function setupServiceWorker() {
   if (!('serviceWorker' in navigator)) {
     console.error('Your browser does not support service workers');
@@ -34,3 +32,13 @@ async function setupServiceWorker() {
     console.error('service worker registered failed:', error);
   }
 }
+
+setupServiceWorker();
+
+// index.html sends a "GET /dog" request
+// before the service worker is registered.
+// This reloads the page after the service worker is registered
+// so the request can be resent.
+navigator.serviceWorker.ready.then(reg => {
+  location.reload();
+});

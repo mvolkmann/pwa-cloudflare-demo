@@ -1,4 +1,3 @@
-console.log('service-worker.js: entered');
 import {Router} from './tiny-request-router.mjs';
 import Dogs from './dogs.js';
 import IDBEasy from './idb-easy.js';
@@ -16,7 +15,6 @@ router.delete('/dog/:id', params => {
   const id = Number(params.id);
   return dogs.deleteDog(id);
 });
-console.log('service-worker.js: router =', router);
 
 const cacheName = 'pwa-demo-v1';
 
@@ -102,7 +100,6 @@ self.addEventListener('fetch', async event => {
   // console.log('service-worker.js fetch: request.method =', request.method);
   // console.log('service-worker.js fetch: pathname =', pathname);
   const match = router.match(request.method, pathname);
-  // console.log('service-worker.js fetch: match =', match);
   const promise = match
     ? match.handler(match.params, request)
     : getResource(request);
@@ -111,8 +108,6 @@ self.addEventListener('fetch', async event => {
 
 //-----------------------------------------------------------------------------
 
-let db;
-
 setupDatabase();
 
 async function setupDatabase() {
@@ -120,38 +115,11 @@ async function setupDatabase() {
   // const estimate = await navigator.storage.estimate();
   // console.log('setup.js: storage estimate =', estimate);
 
-  const storeName = 'dogs';
+  const dbName = 'myDB';
+  const version = 1;
 
   try {
-    db = await openDB(storeName);
-    // await clearStore(storeName);
-  } catch (error) {
-    console.error('setup.js: failed to open db:', error);
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-function openDB(storeName) {
-  console.log('service-worker.js openDB: entered');
-  const version = 1;
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('myDB', version);
-
-    request.onsuccess = async event => {
-      const db = request.result;
-      dogs = new Dogs(new IDBEasy(db));
-      resolve(db);
-    };
-
-    request.onerror = event => {
-      console.error('failed to open database');
-      reject(event);
-    };
-
-    request.onupgradeneeded = async event => {
-      const db = request.result;
-      console.log('service-worker.js onupgradeneeded: db =', db);
+    await IDBEasy.openDB(dbName, version, (db, event) => {
       dogs = new Dogs(new IDBEasy(db));
       console.log('service-worker.js openDB: calling dogs.upgrade');
       dogs.upgrade(event);
@@ -160,6 +128,9 @@ function openDB(storeName) {
         console.log('service-worker.js openDB: calling dogs.initialize');
         dogs.initialize();
       }, 100);
-    };
-  });
+    });
+    // await clearStore(storeName);
+  } catch (error) {
+    console.error('setup.js: failed to open database:', error);
+  }
 }
