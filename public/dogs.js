@@ -84,9 +84,14 @@ export default class Dogs {
   upgrade(event) {
     const {newVersion, oldVersion} = event;
     if (oldVersion === 0) {
-      console.log('creating first version');
+      console.log('creating first version of database');
     } else {
-      console.log('upgrading from version', oldVersion, 'to', newVersion);
+      console.log(
+        'upgrading database from version',
+        oldVersion,
+        'to',
+        newVersion
+      );
     }
 
     const ie = this.idbEasy;

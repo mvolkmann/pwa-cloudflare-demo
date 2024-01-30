@@ -8,8 +8,8 @@ async function setupServiceWorker() {
     const reg = await navigator.serviceWorker.register('service-worker.js', {
       type: 'module'
     });
-    console.log('service worker registered with scope', reg.scope);
 
+    /*
     // TODO: Should you care about these state changes?
     reg.onupdatefound = () => {
       const newSW = reg.installing;
@@ -30,6 +30,7 @@ async function setupServiceWorker() {
         }
       });
     };
+    */
   } catch (error) {
     console.error('service worker registered failed:', error);
   }
@@ -37,16 +38,7 @@ async function setupServiceWorker() {
 
 setupServiceWorker();
 
-// index.html sends a "GET /dog" request
-// before the service worker is registered.
-// This reloads the page after the service worker is registered
-// so the request can be resent.
-let reloaded = false;
-navigator.serviceWorker.ready.then(reg => {
-  console.log('setup.js: reg =', reg);
-  if (reloaded) return;
-  if (reg.active) {
-    location.reload();
-    reloaded = true;
-  }
-});
+navigator.serviceWorker.onmessage = event => {
+  console.log('setup.js: message from service worker =', event.data);
+  window.dispatchEvent(new Event('sw-ready'));
+};

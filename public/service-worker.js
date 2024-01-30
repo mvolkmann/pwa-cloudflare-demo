@@ -9,6 +9,9 @@ const version = 1;
 // changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
+//-----------------------------------------------------------------------------
+// Define routes that this service worker will handle.
+
 async function getDogs() {
   const db = await IDBEasy.openDB(dbName, version);
   return new Dogs(new IDBEasy(db));
@@ -23,7 +26,12 @@ router.get('/dog', async () => {
   return dogs.getDogs();
 });
 
-router.post('/dog', addDog);
+router.post('/dog', async (params, request) => {
+  const formData = await request.formData();
+  const dog = Object.fromEntries(formData);
+  const dogs = await getDogs();
+  return dogs.addDog(dog);
+});
 
 router.put('/dog', async () => {
   const dogs = await getDogs();
@@ -35,15 +43,11 @@ router.delete('/dog/:id', async params => {
   return dogs.deleteDog(Number(params.id));
 });
 
+//-----------------------------------------------------------------------------
+
 const cacheName = 'pwa-demo-v1';
 
-async function addDog(params, request) {
-  const formData = await request.formData();
-  const dog = Object.fromEntries(formData);
-  const dogs = await getDogs();
-  return dogs.addDog(dog);
-}
-
+// This is not currently used.
 async function deleteCache(cacheName) {
   const keys = await caches.keys();
   return Promise.all(
@@ -51,6 +55,7 @@ async function deleteCache(cacheName) {
   );
 }
 
+// This is not currently used.
 async function getBodyText(request) {
   const reader = request.body.getReader();
   let body = '';
@@ -79,8 +84,7 @@ async function getResource(request) {
       if (log) console.log('service worker got', href, 'from network');
 
       const index = pathname.lastIndexOf('.');
-      const extension = index === -1 ? '' : pathname.substring(index + 1);
-      if (fileExtensionsToCache.includes(extension)) {
+      if (shouldCache(pathname)) {
         // Save in cache for when we are offline later.
         const cache = await caches.open(cacheName);
         await cache.add(url);
@@ -95,6 +99,13 @@ async function getResource(request) {
   return resource;
 }
 
+function shouldCache(pathName) {
+  if (pathName.endsWith('setup.js')) return false;
+  if (pathName.endsWith('service-worker.js')) return false;
+  const extension = index === -1 ? '' : pathname.substring(index + 1);
+  return fileExtensionsToCache.includes(extension);
+}
+
 self.addEventListener('install', event => {
   console.log('service-worker.js: installing');
   // This causes a newly installed service worker to
@@ -107,7 +118,7 @@ self.addEventListener('activate', async event => {
   console.log('service-worker.js: activating');
   // event.waitUntil(deleteCache(cacheName));
 
-  // Safari says "The operation is not supported."
+  // Safari says "The operation is not supported." for the "estimate" method.
   // const estimate = await navigator.storage.estimate();
   // console.log('setup.js: storage estimate =', estimate);
 
@@ -116,7 +127,12 @@ self.addEventListener('activate', async event => {
       const dogs = new Dogs(new IDBEasy(db));
       return dogs.upgrade(event);
     });
-    // await clearStore(storeName);
+
+    // Let browser clients know that the service worker is ready.
+    const clients = await self.clients.matchAll({includeUncontrolled: true});
+    for (const client of clients) {
+      client.postMessage('service worker ready');
+    }
   } catch (error) {
     console.error('setup.js: failed to open database:', error);
   }
@@ -127,7 +143,9 @@ self.addEventListener('fetch', async event => {
   const url = new URL(request.url);
   const {pathname} = url;
 
+  const log = request.method === 'GET' && pathname === '/dog';
   const match = router.match(request.method, pathname);
+  if (log) console.log('match for GET /dog =', match);
   const promise = match
     ? match.handler(match.params, request)
     : getResource(request);

@@ -130,7 +130,7 @@ export default class IDBEasy {
         reject(event);
       };
 
-      request.onupgradeneeded = async event => {
+      request.onupgradeneeded = event => {
         const db = request.result;
         upgrade(db, event);
       };

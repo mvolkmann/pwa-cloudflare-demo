@@ -25,11 +25,11 @@
 
     <script defer src="alpine.min.js"></script>
     <script defer src="htmx.min.js"></script>
-    <script src="setup.js"></script>
+    <script defer src="setup.js"></script>
   </head>
   <body>
     <h1
-      x-data="{ status: 'online' }"
+      x-data="{ status: 'online', swStatus: 'waiting'}"
       x-on:online.window="status = 'online'"
       x-on:offline.window="status = 'offline'"
     >
@@ -41,6 +41,7 @@
       >
         ⟳
       </button>
+      <span x-on:sw-ready.window="swStatus = 'ready'" x-text="swStatus"></span>
     </h1>
 
     <section>
@@ -85,7 +86,14 @@
       </div>
 
       <h2>Dogs</h2>
-      <table hx-get="/dog" hx-target="#dog-table-body" hx-trigger="revealed">
+      <!-- When GET /dog is requested before the service worker is ready,
+           (with "load" event) we get a 404.  That seems to be cached so
+           when we try again later we still get a 404. -->
+      <table
+        hx-get="/dog"
+        hx-target="#dog-table-body"
+        hx-trigger="load, sw-ready from:window"
+      >
         <thead>
           <tr>
             <th>ID</th>
