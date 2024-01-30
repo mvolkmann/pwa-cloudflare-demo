@@ -7,8 +7,7 @@ async function setupServiceWorker() {
   }
 
   try {
-    // TODO: It seems like the leading slash is not needed.
-    const reg = await navigator.serviceWorker.register('/service-worker.js', {
+    const reg = await navigator.serviceWorker.register('service-worker.js', {
       type: 'module'
     });
     console.log('service worker registered with scope', reg.scope);

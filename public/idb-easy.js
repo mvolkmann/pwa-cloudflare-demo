@@ -3,7 +3,8 @@ function requestToPromise(request, action) {
     request.onsuccess = event => {
       // console.log('succeeded to', action);
       // TODO: Don't commit if a txn was passed in to caller of this!
-      request.transaction.commit();
+      const txn = request.transaction;
+      if (txn) txn.commit();
       resolve(request.result);
     };
     request.onerror = event => {

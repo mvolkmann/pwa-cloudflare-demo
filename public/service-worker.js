@@ -1,3 +1,4 @@
+console.log('service-worker.js: entered');
 import {Router} from './tiny-request-router.mjs';
 import Dogs from './dogs.js';
 import IDBEasy from './idb-easy.js';
@@ -15,6 +16,7 @@ router.delete('/dog/:id', params => {
   const id = Number(params.id);
   return dogs.deleteDog(id);
 });
+console.log('service-worker.js: router =', router);
 
 const cacheName = 'pwa-demo-v1';
 
@@ -149,6 +151,7 @@ function openDB(storeName) {
 
     request.onupgradeneeded = async event => {
       const db = request.result;
+      console.log('service-worker.js onupgradeneeded: db =', db);
       dogs = new Dogs(new IDBEasy(db));
       console.log('service-worker.js openDB: calling dogs.upgrade');
       dogs.upgrade(event);
