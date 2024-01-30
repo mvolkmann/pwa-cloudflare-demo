@@ -150,9 +150,11 @@ function openDB(storeName) {
     request.onupgradeneeded = async event => {
       const db = request.result;
       dogs = new Dogs(new IDBEasy(db));
+      console.log('service-worker.js openDB: calling dogs.upgrade');
       dogs.upgrade(event);
       // Wait for upgrade transaction to complete.
       setTimeout(() => {
+        console.log('service-worker.js openDB: calling dogs.initialize');
         dogs.initialize();
       }, 100);
     };

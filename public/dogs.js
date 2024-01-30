@@ -1,8 +1,8 @@
+import {el} from './js2html.js';
 const storeName = 'dogs';
 
 function dogToTableRow(dog) {
   const {breed, id, name} = dog;
-  /*
   const idTd = el('td', id);
   const nameTd = el('td', name);
   const breedTd = el('td', breed);
@@ -13,7 +13,7 @@ function dogToTableRow(dog) {
   };
   const deleteTd = el('td', el('button', '🗑', attrs));
   return el('tr', idTd + nameTd + breedTd + deleteTd);
-  */
+  /*
   return `
     <tr>
       <td>${id}</td>
@@ -30,16 +30,7 @@ function dogToTableRow(dog) {
       </td>
     </tr>
   `;
-}
-
-// TODO: Find a better HTML templating approach.
-function el(name, content, attrs = {}) {
-  let html = '<' + name;
-  for (const [key, value] of Object.entries(attrs)) {
-    html += ` ${key}="${value}"`;
-  }
-  html += `>${content}</${name}>`;
-  return html;
+  */
 }
 
 export default class Dogs {
@@ -48,6 +39,7 @@ export default class Dogs {
   }
 
   async initialize() {
+    console.log('dogs.js initialize: entered');
     const ie = this.idbEasy;
     const count = await ie.getRecordCount(storeName);
     console.log('dogs.js initialize: count =', count);
@@ -92,6 +84,7 @@ export default class Dogs {
   }
 
   upgrade(event) {
+    console.log('dogs.js upgrade: entered');
     const {newVersion, oldVersion} = event;
     if (oldVersion === 0) {
       console.log('creating first version');
