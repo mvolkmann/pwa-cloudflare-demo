@@ -50,11 +50,29 @@ export function elc(name, attrs) {
   return html;
 }
 
+export const a = (attrs, children) => el('a', attrs, children);
+export const body = (attrs, children) => el('body', attrs, children);
+export const br = (attrs, children) => elc('br', attrs);
 export const button = (attrs, children) => el('button', attrs, children);
 export const div = (attrs, children) => el('div', attrs, children);
+export const form = (attrs, children) => el('form', attrs, children);
+export const head = (attrs, children) => el('head', attrs, children);
+export const hr = (attrs, children) => elc('hr', attrs);
+export const html = (attrs, children) => el('html', attrs, children);
 export const img = (attrs, children) => elc('img', attrs);
+export const li = (attrs, children) => el('li', attrs, children);
+export const ol = (attrs, children) => el('ol', attrs, children);
+export const option = (attrs, children) => el('option', attrs, children);
 export const p = (attrs, children) => el('p', attrs, children);
+export const script = (attrs, children) => el('script', attrs, children);
+export const section = (attrs, children) => el('section', attrs, children);
+export const select = (attrs, children) => el('select', attrs, children);
+export const span = (attrs, children) => el('span', attrs, children);
 export const table = (attrs, children) => el('table', attrs, children);
+export const tbody = (attrs, children) => el('tbody', attrs, children);
 export const td = (attrs, children) => el('td', attrs, children);
+export const tfoot = (attrs, children) => el('tfoot', attrs, children);
 export const th = (attrs, children) => el('th', attrs, children);
+export const thead = (attrs, children) => el('thead', attrs, children);
 export const tr = (attrs, children) => el('tr', attrs, children);
+export const ul = (attrs, children) => el('ul', attrs, children);
