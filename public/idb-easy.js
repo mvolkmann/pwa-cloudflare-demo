@@ -124,7 +124,6 @@ export default class IDBEasy {
       };
 
       request.onupgradeneeded = async event => {
-        console.log('idb-easy.js onupgradeneeded: entered');
         const db = request.result;
         upgrade(db, event);
       };

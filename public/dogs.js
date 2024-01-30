@@ -69,7 +69,6 @@ export default class Dogs {
   }
 
   upgrade(event) {
-    console.log('dogs.js upgrade: entered');
     const {newVersion, oldVersion} = event;
     if (oldVersion === 0) {
       console.log('creating first version');

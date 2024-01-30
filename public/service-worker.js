@@ -6,24 +6,24 @@ import IDBEasy from './idb-easy.js';
 // changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
+let dogs;
+
 const router = new Router();
 router.get('/hello', () => new Response('Hello from service worker!'));
-router.get('/dog', () => dogs.getDogs());
+router.get('/dog', () => dogs?.getDogs());
 router.post('/dog', addDog);
-router.put('/dog', () => dogs.updateSnoopy());
+router.put('/dog', () => dogs?.updateSnoopy());
 router.delete('/dog/:id', params => {
   const id = Number(params.id);
-  return dogs.deleteDog(id);
+  return dogs?.deleteDog(id);
 });
 
 const cacheName = 'pwa-demo-v1';
 
-let dogs;
-
 async function addDog(params, request) {
   const formData = await request.formData();
   const dog = Object.fromEntries(formData);
-  return dogs.addDog(dog);
+  return dogs?.addDog(dog);
 }
 
 async function deleteCache(cacheName) {
@@ -97,8 +97,6 @@ self.addEventListener('fetch', async event => {
   const url = new URL(request.url);
   const {pathname} = url;
 
-  // console.log('service-worker.js fetch: request.method =', request.method);
-  // console.log('service-worker.js fetch: pathname =', pathname);
   const match = router.match(request.method, pathname);
   const promise = match
     ? match.handler(match.params, request)
@@ -121,11 +119,9 @@ async function setupDatabase() {
   try {
     await IDBEasy.openDB(dbName, version, (db, event) => {
       dogs = new Dogs(new IDBEasy(db));
-      console.log('service-worker.js openDB: calling dogs.upgrade');
       dogs.upgrade(event);
       // Wait for upgrade transaction to complete.
       setTimeout(() => {
-        console.log('service-worker.js openDB: calling dogs.initialize');
         dogs.initialize();
       }, 100);
     });
