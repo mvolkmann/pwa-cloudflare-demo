@@ -32,7 +32,7 @@ async function setupServiceWorker() {
     };
     */
   } catch (error) {
-    console.error('service worker registered failed:', error);
+    console.error('setup.js setupServiceWorker registered failed:', error);
   }
 }
 

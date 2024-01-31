@@ -69,7 +69,7 @@ async function getBodyText(request) {
 }
 
 async function getResource(request) {
-  const log = true;
+  const log = false;
   const url = new URL(request.url);
   const {href, pathname} = url;
 
@@ -92,8 +92,9 @@ async function getResource(request) {
         await cache.add(url);
         if (log) console.log('service worker cached', href);
       }
-    } catch (e) {
+    } catch (error) {
       console.error('service worker failed to fetch', url);
+      console.log('service-worker.js getResource: error =', error);
       resource = new Response('', {status: 404});
     }
   }
@@ -101,7 +102,7 @@ async function getResource(request) {
   return resource;
 }
 
-function shouldCache(pathName) {
+function shouldCache(pathname) {
   // if (pathName.endsWith('setup.js')) return false;
   // if (pathName.endsWith('service-worker.js')) return false;
   const index = pathname.lastIndexOf('.');
@@ -138,7 +139,7 @@ self.addEventListener('activate', async event => {
       client.postMessage('service worker ready');
     }
   } catch (error) {
-    console.error('setup.js: failed to open database:', error);
+    console.error('setup.js activate: failed to open database:', error);
   }
 });
 
