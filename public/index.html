@@ -45,25 +45,6 @@
     </div>
 
     <section>
-      <h2>Alpine Counter</h2>
-      <div class="counter" x-data="{ count: 0 }">
-        <button x-bind:disabled="count <= 0" x-on:click="count--">-</button>
-        <div x-text="count"></div>
-        <button x-on:click="count++">+</button>
-      </div>
-    </section>
-
-    <section>
-      <button hx-get="/get-text" hx-target="#text">Get Text</button>
-      <span id="text"></span>
-    </section>
-
-    <section>
-      <button hx-get="/get-html" hx-target="#html">Get HTML</button>
-      <span id="html"></span>
-    </section>
-
-    <section>
       <form
         hx-on:htmx:after-request="this.reset()"
         hx-post="/dog"
@@ -107,6 +88,25 @@
     </section>
 
     <img alt="Comet" src="/images/comet.png" />
+
+    <!-- <section>
+      <h2>Alpine Counter</h2>
+      <div class="counter" x-data="{ count: 0 }">
+        <button x-bind:disabled="count <= 0" x-on:click="count--">-</button>
+        <div x-text="count"></div>
+        <button x-on:click="count++">+</button>
+      </div>
+    </section>
+
+    <section>
+      <button hx-get="/get-text" hx-target="#text">Get Text</button>
+      <span id="text"></span>
+    </section>
+
+    <section>
+      <button hx-get="/get-html" hx-target="#html">Get HTML</button>
+      <span id="html"></span>
+    </section> -->
 
     <h2>Pokemon</h2>
     <table

@@ -25,7 +25,12 @@ form {
   background-color: lightyellow;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
+  margin-top: 1rem;
   padding: 0.5rem;
+
+  & button {
+    background-color: orange;
+  }
 }
 
 input {
@@ -35,6 +40,7 @@ input {
 
 h1 {
   color: orange;
+  margin-bottom: 0;
   margin-top: 0;
 }
 
