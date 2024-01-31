@@ -1,6 +1,13 @@
-// Generates an HTML string for an element with a close tag.
+/**
+ * Generates an HTML string for an element with a close tag.
+ * @param {string} name
+ * @param {Object.<string, boolean | number | string>} attrs
+ * @param {string[]} children
+ * @returns string - the HTML
+ */
 export function el(name, attrs, children) {
   // Begin the opening tag.
+  /** @type {string} */
   let html = '<' + name;
 
   if (typeof attrs === 'object' && !Array.isArray(attrs)) {
@@ -32,9 +39,15 @@ export function el(name, attrs, children) {
   return html;
 }
 
-// Generates an HTML string for a self-closing element.
+/**
+ * Generates an HTML string for a self-closing element.
+ * @param {string} name
+ * @param {Object.<string, boolean | number | string>} attrs
+ * @returns string - the HTML
+ */
 export function elc(name, attrs) {
   // Begin the tag.
+  /** @type {string} */
   let html = '<' + name;
 
   if (typeof attrs === 'object' && !Array.isArray(attrs)) {
@@ -50,7 +63,14 @@ export function elc(name, attrs) {
   return html;
 }
 
+/**
+ * Generates an HTML string for an anchor tag.
+ * @param {Object.<string, boolean | number | string>} attrs
+ * @param {[string]} children
+ * @returns string - the HTML
+ */
 export const a = (attrs, children) => el('a', attrs, children);
+
 export const body = (attrs, children) => el('body', attrs, children);
 export const br = (attrs, children) => elc('br', attrs);
 export const button = (attrs, children) => el('button', attrs, children);
