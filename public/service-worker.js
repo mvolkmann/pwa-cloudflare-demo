@@ -78,12 +78,10 @@ async function getResource(request) {
   if (resource) {
     if (log) console.log('service worker got', href, 'from cache');
   } else {
-    console.log('service-worker.js getResource: pathname =', pathname);
     try {
       // Get from network.
       // TODO: Why does a GET of / fail now? Works fine without service worker!
       resource = await fetch(request);
-      console.log('service-worker.js getResource: resource =', resource);
       if (log) console.log('service worker got', href, 'from network');
 
       if (shouldCache(pathname)) {
@@ -103,11 +101,10 @@ async function getResource(request) {
 }
 
 function shouldCache(pathname) {
-  // if (pathName.endsWith('setup.js')) return false;
-  // if (pathName.endsWith('service-worker.js')) return false;
+  if (pathname.endsWith('setup.js')) return false;
+  if (pathname.endsWith('service-worker.js')) return false;
   const index = pathname.lastIndexOf('.');
   const extension = index === -1 ? '' : pathname.substring(index + 1);
-  console.log('service-worker.js shouldCache: extension =', extension);
   return fileExtensionsToCache.includes(extension);
 }
 
