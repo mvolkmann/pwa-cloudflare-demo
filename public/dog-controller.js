@@ -39,6 +39,11 @@ export default class DogController {
     this.idbEasy = idbEasy;
   }
 
+  /**
+   * This initializes the dogs store with sample data.
+   * @param {IDBTransaction} txn
+   * @returns {Promise<void>}
+   */
   async initialize(txn) {
     const ie = this.idbEasy;
     try {
@@ -96,6 +101,12 @@ export default class DogController {
     }
   }
 
+  /**
+   * This creates the initial stores and indexes in the database
+   * or upgrades existing ones.
+   * @param {IDBVersionChangeEvent} event
+   * @returns {Promise<void>}
+   */
   upgrade(event) {
     const {newVersion, oldVersion} = event;
     if (oldVersion === 0) {
@@ -112,9 +123,11 @@ export default class DogController {
     const ie = this.idbEasy;
 
     // If the "dogs" store already exists, delete it.
-    const txn = event.target.transaction;
-    const names = Array.from(txn.objectStoreNames);
-    if (names.includes(storeName)) ie.deleteStore(storeName);
+    const txn = event.target?.transaction;
+    if (txn) {
+      const names = Array.from(txn.objectStoreNames);
+      if (names.includes(storeName)) ie.deleteStore(storeName);
+    }
 
     // Recreate the "dogs" store and its indexes.
     const store = ie.createStore(storeName, 'id', true);

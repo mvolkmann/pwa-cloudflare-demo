@@ -1,9 +1,9 @@
 /**
  * This returns a Promise that resolves to the result of a given request.
  * @param {IDBRequest} request
- * @param {string} action (for debugging)
- * @param {boolean} [suppliedTxn]
- * @returns
+ * @param {string} action - for debugging
+ * @param {boolean} [suppliedTxn] - indicates whether a transaction was supplied
+ * @returns {Promise<any>}
  */
 function requestToPromise(request, action, suppliedTxn = false) {
   return new Promise((resolve, reject) => {
@@ -14,13 +14,17 @@ function requestToPromise(request, action, suppliedTxn = false) {
     };
     request.onerror = event => {
       console.error('failed to', action);
-      request.transaction.abort();
+      request.transaction?.abort();
       reject(event);
     };
   });
 }
 
 export default class IDBEasy {
+  /**
+   * This creates an instance of IDBEasy.
+   * @param {IDBDatabase} db
+   */
   constructor(db) {
     this.db = db;
   }
@@ -29,7 +33,7 @@ export default class IDBEasy {
    * This deletes all the records in a given store.
    * @param {string} storeName
    * @param {IDBTransaction} txn
-   * @returns
+   * @returns {Promise<void>}
    */
   clearStore(storeName, txn) {
     const suppliedTxn = Boolean(txn);
@@ -45,7 +49,7 @@ export default class IDBEasy {
    * @param {string} indexName
    * @param {string} keyPath
    * @param {boolean} [unique]
-   * @returns
+   * @returns {void}
    */
   createIndex(store, indexName, keyPath, unique = false) {
     store.createIndex(indexName, keyPath, {unique});
@@ -56,7 +60,7 @@ export default class IDBEasy {
    * @param {string} storeName
    * @param {object} object
    * @param {IDBTransaction} txn
-   * @returns
+   * @returns {Promise<number|string>} key of new record
    */
   createRecord(storeName, object, txn) {
     const suppliedTxn = Boolean(txn);
@@ -72,7 +76,7 @@ export default class IDBEasy {
    * @param {string} storeName
    * @param {string} keyPath
    * @param {boolean} [autoIncrement]
-   * @returns
+   * @returns {IDBObjectStore}
    */
   createStore(storeName, keyPath, autoIncrement = false) {
     return this.db.createObjectStore(storeName, {autoIncrement, keyPath});
@@ -81,7 +85,7 @@ export default class IDBEasy {
   /**
    * This deletes a given database
    * @param {string} dbName
-   * @returns
+   * @returns {Promise<void>}
    */
   static deleteDB(dbName) {
     const request = indexedDB.deleteDatabase(dbName);
@@ -126,7 +130,7 @@ export default class IDBEasy {
    * @param {string} storeName
    * @param {any} key
    * @param {IDBTransaction} txn
-   * @returns
+   * @returns {Promise<void>}
    */
   deleteRecordByKey(storeName, key, txn) {
     const suppliedTxn = Boolean(txn);
@@ -139,6 +143,7 @@ export default class IDBEasy {
   /**
    * This deletes a given store.
    * @param {string} storeName
+   * @returns {void}
    */
   deleteStore(storeName) {
     this.db.deleteObjectStore(storeName);
@@ -148,7 +153,7 @@ export default class IDBEasy {
    * This gets all the record in a given store.
    * @param {string} storeName
    * @param {IDBTransaction} txn
-   * @returns {Promise<object>}
+   * @returns {Promise<object[]>}
    */
   getAllRecords(storeName, txn) {
     const suppliedTxn = Boolean(txn);
