@@ -10,17 +10,15 @@ const version = 1;
 // because we want changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
-let dogController;
 let dogRouter;
 
 const promise = IDBEasy.openDB(dbName, version, (db, event) => {
-  dogController = new DogController(new IDBEasy(db));
-  console.log('service-worker.js : dogController =', dogController);
+  const dogController = new DogController(new IDBEasy(db));
   return dogController.upgrade(event);
 });
 
 promise.then(db => {
-  dogController = new DogController(new IDBEasy(db));
+  const dogController = new DogController(new IDBEasy(db));
   dogRouter = getRouter(dogController);
 });
 
@@ -57,7 +55,6 @@ async function getResource(request) {
   } else {
     try {
       // Get from network.
-      // TODO: Why does a GET of / fail now? Works fine without service worker!
       resource = await fetch(request);
       if (log) console.log('service worker got', href, 'from network');
 
@@ -104,17 +101,13 @@ self.addEventListener('activate', async event => {
   // console.log('setup.js: storage estimate =', estimate);
 
   try {
-    await IDBEasy.openDB(dbName, version, (db, event) => {
-      return dogController.upgrade(event);
-    });
-
     // Let browser clients know that the service worker is ready.
     const clients = await self.clients.matchAll({includeUncontrolled: true});
     for (const client of clients) {
       client.postMessage('service worker ready');
     }
   } catch (error) {
-    console.error('setup.js activate: failed to open database:', error);
+    console.error('setup.js activate: failed to notify clients:', error);
   }
 });
 

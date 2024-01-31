@@ -69,6 +69,10 @@ table {
 
 td {
   background-color: white;
+
+  & button {
+    background-color: transparent;
+  }
 }
 
 th {
