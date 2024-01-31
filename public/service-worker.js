@@ -111,14 +111,17 @@ self.addEventListener('activate', async event => {
   }
 });
 
+// This is not used for the initial load of a PWA,
+// only for subsequent loads.
 self.addEventListener('fetch', async event => {
   const {request} = event;
   const url = new URL(request.url);
   const {pathname} = url;
+  // console.log('service-worker.js fetch: pathname =', pathname);
 
-  const log = request.method === 'GET' && pathname === '/dog';
+  // const log = request.method === 'GET' && pathname === '/dog';
   const match = dogRouter.match(request.method, pathname);
-  if (log) console.log('match for GET /dog =', match);
+  // if (log) console.log('match for GET /dog =', match);
   const promise = match
     ? match.handler(match.params, request)
     : getResource(request);

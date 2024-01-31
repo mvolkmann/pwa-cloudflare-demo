@@ -39,10 +39,6 @@
       Network status:
       <span x-text="networkStatus"></span>
     </div>
-    <div x-on:sw-ready.window="console.log('GOT EVENT'); swStatus = 'ready'">
-      Service Worker status:
-      <span x-bind:class="swStatus" x-text="swStatus"></span>
-    </div>
 
     <section>
       <form
@@ -67,12 +63,9 @@
       </div>
 
       <h2>Dogs</h2>
-      <button hx-get="/dog" hx-target="#dog-table-body">Load Dogs</button>
-      <!-- When GET /dog is requested before the service worker is ready,
-           (with "load" event) we get a 404.  That seems to be cached so
-           when we try again later we still get a 404. -->
+      <!-- When GET /dog is requested on the initial load of the PWA,
+           the service worker is not used and we get a 404. -->
       <table hx-get="/dog" hx-target="#dog-table-body" hx-trigger="load">
-        <!-- hx-trigger="load, sw-ready from:window" -->
         <thead>
           <tr>
             <th>ID</th>
@@ -87,7 +80,7 @@
 
     <img alt="Comet" src="/images/comet.png" />
 
-    <!-- <section>
+    <section>
       <h2>Alpine Counter</h2>
       <div class="counter" x-data="{ count: 0 }">
         <button x-bind:disabled="count <= 0" x-on:click="count--">-</button>
@@ -95,16 +88,6 @@
         <button x-on:click="count++">+</button>
       </div>
     </section>
-
-    <section>
-      <button hx-get="/get-text" hx-target="#text">Get Text</button>
-      <span id="text"></span>
-    </section>
-
-    <section>
-      <button hx-get="/get-html" hx-target="#html">Get HTML</button>
-      <span id="html"></span>
-    </section> -->
 
     <h2>Pokemon</h2>
     <table

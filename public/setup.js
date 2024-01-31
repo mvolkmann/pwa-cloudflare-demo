@@ -40,9 +40,10 @@ setupServiceWorker();
 
 navigator.serviceWorker.onmessage = event => {
   console.log('setup.js: message from service worker =', event.data);
-  // window.dispatchEvent(new Event('sw-ready'));
+  // Now that the service worker is installed,
+  // reload the page so a GET to /dog will work.
   setTimeout(() => {
-    // TODO: Why doesn't this hit the service worker fetch handler?
-    htmx.ajax('GET', '/dog', '#dog-table-body');
-  }, 1000);
+    location.reload();
+    console.log('setup.js: called reload');
+  }, 100);
 };
