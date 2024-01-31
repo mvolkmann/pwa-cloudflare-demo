@@ -5,8 +5,8 @@ import IDBEasy from './idb-easy.js';
 const dbName = 'myDB';
 const version = 1;
 
-// We aren't currently caching .css files because we want
-// changes to be reflected without clearing the cache.
+// We aren't currently caching .css files and certain .js files
+// because we want changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
 //-----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ async function getBodyText(request) {
 }
 
 async function getResource(request) {
-  const log = false;
+  const log = true;
   const url = new URL(request.url);
   const {href, pathname} = url;
 
@@ -78,12 +78,14 @@ async function getResource(request) {
   if (resource) {
     if (log) console.log('service worker got', href, 'from cache');
   } else {
+    console.log('service-worker.js getResource: pathname =', pathname);
     try {
       // Get from network.
+      // TODO: Why does a GET of / fail now? Works fine without service worker!
       resource = await fetch(request);
+      console.log('service-worker.js getResource: resource =', resource);
       if (log) console.log('service worker got', href, 'from network');
 
-      const index = pathname.lastIndexOf('.');
       if (shouldCache(pathname)) {
         // Save in cache for when we are offline later.
         const cache = await caches.open(cacheName);
@@ -100,9 +102,11 @@ async function getResource(request) {
 }
 
 function shouldCache(pathName) {
-  if (pathName.endsWith('setup.js')) return false;
-  if (pathName.endsWith('service-worker.js')) return false;
+  // if (pathName.endsWith('setup.js')) return false;
+  // if (pathName.endsWith('service-worker.js')) return false;
+  const index = pathname.lastIndexOf('.');
   const extension = index === -1 ? '' : pathname.substring(index + 1);
+  console.log('service-worker.js shouldCache: extension =', extension);
   return fileExtensionsToCache.includes(extension);
 }
 
