@@ -1,3 +1,6 @@
+// See https://joshuatz.com/posts/2021/strongly-typed-service-workers/
+// for details on declaring TypeScript types in service workers.
+
 /**
  * Generates an HTML string for an element with a close tag.
  * @param {string} name

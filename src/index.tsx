@@ -50,7 +50,7 @@ app.get('/pokemon-rows', async (c: Context) => {
   const offset = (pageNumber - 1) * ROWS_PER_PAGE;
   const url = POKEMON_URL_PREFIX + `?offset=${offset}&limit=${ROWS_PER_PAGE}`;
   const response = await fetch(url);
-  const json = await response.json();
+  const json = (await response.json()) as {results: Pokemon[]};
   const pokemonList = json.results as Pokemon[];
 
   return c.html(

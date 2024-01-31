@@ -1,3 +1,7 @@
+/// <reference no-default-lib="true"/>
+/// <reference lib="ES2016" />
+/// <reference lib="webworker" />
+
 import DogController from './dog-controller.js';
 import {getRouter} from './dog-router.js';
 import IDBEasy from './idb-easy.js';
@@ -10,6 +14,16 @@ const version = 1;
 // because we want changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
+/**
+ * @typedef {object} Match - returned from tiny-request-router match method
+ * @property {string} method
+ * @property {string} path
+ * @property {() => Response} handler
+ */
+
+/**
+ * @type {{match: (method: string, pathname: string) => Match }}
+ */
 let dogRouter;
 
 const promise = IDBEasy.openDB(dbName, version, (db, event) => {
@@ -22,33 +36,52 @@ promise.then(db => {
   dogRouter = getRouter(dogController);
 });
 
-// This is not currently used.
+/**
+ * This deletes all the keys from a given cache.
+ * It is not currently used.
+ * @param {string} cacheName
+ * @returns {Promise<void>}
+ */
 async function deleteCache(cacheName) {
+  // @type {string[]}
   const keys = await caches.keys();
-  return Promise.all(
+  await Promise.all(
     keys.map(key => (key === cacheName ? null : caches.delete(key)))
   );
 }
 
+/**
+ * This gets the body of a request as text.
+ * @param {Request} request
+ * @returns {Promise<string>} the body text
+ */
 // This is not currently used.
 async function getBodyText(request) {
-  const reader = request.body.getReader();
-  let body = '';
+  const {body} = request;
+  if (!body) return '';
+  const reader = body.getReader();
+  let result = '';
   while (true) {
     const {done, value} = await reader.read();
     const text = new TextDecoder().decode(value);
-    body += text;
+    result += text;
     if (done) break;
   }
-  return body;
+  return result;
 }
 
+/**
+ * This gets a resource from the cache or the network.
+ * @param {Request} request
+ * @returns Response
+ */
 async function getResource(request) {
   const log = false;
   const url = new URL(request.url);
   const {href, pathname} = url;
 
   // Attempt to get from cache.
+  /** @type {Response | undefined} */
   let resource = await caches.match(request);
   if (resource) {
     if (log) console.log('service worker got', href, 'from cache');
@@ -74,6 +107,11 @@ async function getResource(request) {
   return resource;
 }
 
+/**
+ * This determines whether the file at a given pathname should be cached.
+ * @param {string} pathname
+ * @returns {boolean}
+ */
 function shouldCache(pathname) {
   if (pathname.endsWith('setup.js')) return false;
   if (pathname.endsWith('service-worker.js')) return false;
@@ -126,4 +164,10 @@ self.addEventListener('fetch', async event => {
     ? match.handler(match.params, request)
     : getResource(request);
   event.respondWith(promise);
+});
+
+// For testing, this can be triggered from the Chrome DevTools Application tab.
+// TODO: Get this type from https://www.npmjs.com/package/@types/serviceworker?
+self.addEventListener('push', async event => {
+  console.log('service-worker.js push: event =', event);
 });

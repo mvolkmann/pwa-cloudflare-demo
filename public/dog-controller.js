@@ -2,6 +2,15 @@ import {button, td, tr} from './js2html.js';
 
 const storeName = 'dogs';
 
+/**
+ * @typedef {{id: number, name: string, breed: string}} Dog
+ */
+
+/**
+ * Converts a Dog object to an HTML string.
+ * @param {Dog} dog
+ * @returns
+ */
 function dogToTableRow(dog) {
   const {breed, id, name} = dog;
   return tr([
@@ -22,6 +31,10 @@ function dogToTableRow(dog) {
 }
 
 export default class DogController {
+  /**
+   *
+   * @param {any} idbEasy
+   */
   constructor(idbEasy) {
     this.idbEasy = idbEasy;
   }
@@ -45,6 +58,7 @@ export default class DogController {
         txn
       );
 
+      /** @type {Dog[]} */
       const dogs = await ie.getAllRecords(storeName, txn);
       const comet = dogs.find(dog => dog.name === 'Comet');
       if (comet) {
@@ -110,6 +124,11 @@ export default class DogController {
     return this.initialize(txn);
   }
 
+  /**
+   * Adds a Dog to the database.
+   * @param {Dog} dog
+   * @returns {Promise<Response>} HTML for a new table row.
+   */
   async addDog(dog) {
     const ie = this.idbEasy;
     dog.id = await ie.createRecord('dogs', dog);
@@ -119,6 +138,11 @@ export default class DogController {
     });
   }
 
+  /**
+   * Deletes a Dog from the database.
+   * @param {number} id
+   * @returns {Promise<Response>} HTML for table rows for all remaining dogs.
+   */
   async deleteDog(id) {
     const ie = this.idbEasy;
     await ie.deleteRecordByKey('dogs', id);

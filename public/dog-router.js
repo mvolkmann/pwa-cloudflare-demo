@@ -1,6 +1,9 @@
 // This file defines the routes that the service worker will handle.
 import {Router} from './tiny-request-router.mjs';
 
+/**
+ * @typedef {{id: number, name: string, breed: string}} Dog
+ */
 export function getRouter(dogController) {
   const router = new Router();
 
