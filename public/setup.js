@@ -39,11 +39,14 @@ async function setupServiceWorker() {
 setupServiceWorker();
 
 navigator.serviceWorker.onmessage = event => {
-  console.log('setup.js: message from service worker =', event.data);
-  // Now that the service worker is installed,
-  // reload the page so a GET to /dog will work.
-  setTimeout(() => {
-    location.reload();
-    console.log('setup.js: called reload');
-  }, 100);
+  // console.log('setup.js: message from service worker =', event.data);
+  const haveServiceWorker = Boolean(navigator.serviceWorker.controller);
+  if (!haveServiceWorker) {
+    // Now that the service worker is installed,
+    // reload the page so a GET to /dog will work.
+    // The timeout gives the service worker time to really be ready.
+    setTimeout(() => {
+      location.reload();
+    }, 100);
+  }
 };
