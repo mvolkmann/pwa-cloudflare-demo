@@ -70,11 +70,8 @@
       <!-- When GET /dog is requested before the service worker is ready,
            (with "load" event) we get a 404.  That seems to be cached so
            when we try again later we still get a 404. -->
-      <table
-        hx-get="/dog"
-        hx-target="#dog-table-body"
-        hx-trigger="load, sw-ready from:window"
-      >
+      <table hx-get="/dog" hx-target="#dog-table-body" hx-trigger="load">
+        <!-- hx-trigger="load, sw-ready from:window" -->
         <thead>
           <tr>
             <th>ID</th>
