@@ -1,7 +1,8 @@
-import {Router} from './tiny-request-router.mjs';
-import Dogs from './dogs.js';
+import DogController from './dog-controller.js';
+import {getRouter} from './dog-router.js';
 import IDBEasy from './idb-easy.js';
 
+const cacheName = 'pwa-demo-v1';
 const dbName = 'myDB';
 const version = 1;
 
@@ -9,43 +10,19 @@ const version = 1;
 // because we want changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
-//-----------------------------------------------------------------------------
-// Define routes that this service worker will handle.
+let dogController;
+let dogRouter;
 
-async function getDogs() {
-  const db = await IDBEasy.openDB(dbName, version);
-  return new Dogs(new IDBEasy(db));
-}
-
-const router = new Router();
-
-router.get('/hello', () => new Response('Hello from service worker!'));
-
-router.get('/dog', async () => {
-  const dogs = await getDogs();
-  return dogs.getDogs();
+const promise = IDBEasy.openDB(dbName, version, (db, event) => {
+  dogController = new DogController(new IDBEasy(db));
+  console.log('service-worker.js : dogController =', dogController);
+  return dogController.upgrade(event);
 });
 
-router.post('/dog', async (params, request) => {
-  const formData = await request.formData();
-  const dog = Object.fromEntries(formData);
-  const dogs = await getDogs();
-  return dogs.addDog(dog);
+promise.then(db => {
+  dogController = new DogController(new IDBEasy(db));
+  dogRouter = getRouter(dogController);
 });
-
-router.put('/dog', async () => {
-  const dogs = await getDogs();
-  return dogs.updateSnoopy();
-});
-
-router.delete('/dog/:id', async params => {
-  const dogs = await getDogs();
-  return dogs.deleteDog(Number(params.id));
-});
-
-//-----------------------------------------------------------------------------
-
-const cacheName = 'pwa-demo-v1';
 
 // This is not currently used.
 async function deleteCache(cacheName) {
@@ -108,6 +85,8 @@ function shouldCache(pathname) {
   return fileExtensionsToCache.includes(extension);
 }
 
+//-----------------------------------------------------------------------------
+
 self.addEventListener('install', event => {
   console.log('service-worker.js: installing');
   // This causes a newly installed service worker to
@@ -126,8 +105,7 @@ self.addEventListener('activate', async event => {
 
   try {
     await IDBEasy.openDB(dbName, version, (db, event) => {
-      const dogs = new Dogs(new IDBEasy(db));
-      return dogs.upgrade(event);
+      return dogController.upgrade(event);
     });
 
     // Let browser clients know that the service worker is ready.
@@ -146,7 +124,7 @@ self.addEventListener('fetch', async event => {
   const {pathname} = url;
 
   const log = request.method === 'GET' && pathname === '/dog';
-  const match = router.match(request.method, pathname);
+  const match = dogRouter.match(request.method, pathname);
   if (log) console.log('match for GET /dog =', match);
   const promise = match
     ? match.handler(match.params, request)

@@ -1,4 +1,5 @@
-import {button, div, p, table, td, th, tr} from './js2html.js';
+import {button, td, tr} from './js2html.js';
+
 const storeName = 'dogs';
 
 function dogToTableRow(dog) {
@@ -20,7 +21,7 @@ function dogToTableRow(dog) {
   ]);
 }
 
-export default class Dogs {
+export default class DogController {
   constructor(idbEasy) {
     this.idbEasy = idbEasy;
   }
@@ -127,7 +128,6 @@ export default class Dogs {
   async getDogs() {
     const ie = this.idbEasy;
     const dogs = await ie.getAllRecords('dogs');
-    console.log('dogs.js getDogs: dogs =', dogs);
     const html = dogs.map(dogToTableRow).join('');
     return new Response(html, {
       headers: {'Content-Type': 'application/html'}
