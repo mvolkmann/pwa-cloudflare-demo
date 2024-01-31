@@ -27,24 +27,22 @@
     <script defer src="htmx.min.js"></script>
     <script defer src="setup.js"></script>
   </head>
-  <body x-data="{ networkStatus: 'online', serviceWorkerStatus: 'waiting'}">
-    <h1
+  <body x-data="{ networkStatus: 'online', swStatus: 'waiting'}">
+    <h1>
+      PWA Demo
+      <button id="reload" x-on:click="location.reload()">⟳</button>
+    </h1>
+    <div
       x-on:online.window="networkStatus = 'online'"
       x-on:offline.window="networkStatus = 'offline'"
     >
-      PWA Demo -
-      <span x-bind:class="networkStatus" x-text="networkStatus"></span>
-      <button
-        id="reload"
-        x-on:click="console.log('reloading'); location.reload()"
-      >
-        ⟳
-      </button>
-      <span
-        x-on:sw-ready.window="serviceWorkerStatus = 'ready'"
-        x-text="serviceWorkerStatus"
-      ></span>
-    </h1>
+      Network status:
+      <span x-text="networkStatus"></span>
+    </div>
+    <div x-on:sw-ready.window="console.log('GOT EVENT'); swStatus = 'ready'">
+      Service Worker status:
+      <span x-bind:class="swStatus" x-text="swStatus"></span>
+    </div>
 
     <section>
       <h2>Alpine Counter</h2>
@@ -87,7 +85,6 @@
         <button hx-put="/dog" hx-target="#dog-table-body">Update Snoopy</button>
       </div>
 
-      <!-- <template x-if="serviceWorkerStatus === 'ready'"> -->
       <h2>Dogs</h2>
       <!-- When GET /dog is requested before the service worker is ready,
            (with "load" event) we get a 404.  That seems to be cached so
@@ -107,7 +104,6 @@
         </thead>
         <tbody id="dog-table-body"></tbody>
       </table>
-      <!-- </template> -->
     </section>
 
     <img alt="Comet" src="/images/comet.png" />

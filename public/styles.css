@@ -48,13 +48,6 @@ label {
   font-weight: bold;
 }
 
-.offline {
-  color: red;
-}
-.online {
-  color: green;
-}
-
 #reload {
   background-color: transparent;
   font-size: 3rem;
