@@ -2,7 +2,7 @@
   "name": "pwa-cloudflare-demo",
   "type": "module",
   "scripts": {
-    "check": "tsc --noEmit",
+    "check": "tsc",
     "dev": "wrangler dev src/index.tsx",
     "deploy": "wrangler deploy --minify src/index.tsx",
     "format": "prettier --write '**/*.{css,html,js,ts,tsx}'",
