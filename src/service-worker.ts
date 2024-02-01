@@ -20,7 +20,7 @@ const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 /**
  * @type {{match: (method: string, pathname: string) => RouterMatch }}
  */
-let dogRouter;
+let dogRouter: typeof Router | undefined;
 
 const promise = IDBEasy.openDB(dbName, version, (db, event) => {
   const dogController = new DogController(new IDBEasy(db));
