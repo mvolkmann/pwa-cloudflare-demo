@@ -1,5 +1,5 @@
 // This file defines the routes that the service worker will handle.
-import DogController from './dog-controller';
+// import DogController from './dog-controller';
 import {Router} from './tiny-request-router.mjs';
 
 /**
