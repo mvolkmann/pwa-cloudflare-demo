@@ -1,5 +1,5 @@
 import IDBEasy from './idb-easy';
-import {button, el, td, tr} from './js2html';
+import {button, td, tr} from './js2html';
 
 const storeName = 'dogs';
 
