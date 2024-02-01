@@ -1,9 +1,8 @@
-node_modules
-dist
-.wrangler
 .dev.vars
-
-# Change them to your taste:
-wrangler.toml
-package-lock.json
 .DS_Store
+.wrangler
+dist
+node_modules
+package-lock.json
+tsconfig.tsbuildinfo
+wrangler.toml

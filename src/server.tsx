@@ -14,7 +14,7 @@ const ROWS_PER_PAGE = 10;
 const app = new Hono();
 
 // Serve static files from the public directory.
-app.use('/*', serveStatic({root: './'}));
+app.use('/*', serveStatic({root: './static'}));
 
 function TableRow(page: number, pokemon: Pokemon, isLast: boolean) {
   const attributes = isLast
