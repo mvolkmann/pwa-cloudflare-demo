@@ -8,7 +8,7 @@
     "lib": ["dom", "esnext"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "outDir": "./dist",
+    "outDir": "./public/scripts",
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
