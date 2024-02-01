@@ -4,7 +4,7 @@
   "scripts": {
     "check": "tsc --noEmit",
     "compile": "tsc",
-    "dev": "wrangler dev src/index.tsx",
+    "dev": "wrangler dev src/server.tsx",
     "deploy": "wrangler deploy --minify src/index.tsx",
     "format": "prettier --write '**/*.{css,html,js,ts,tsx}'",
     "reinstall": "rm -rf node_modules bun.lockb && bun install",

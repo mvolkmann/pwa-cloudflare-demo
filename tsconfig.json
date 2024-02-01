@@ -16,5 +16,5 @@
     "target": "ESNext",
     "types": ["bun-types", "web"]
   },
-  "include": ["./public", "./src"]
+  "include": ["./src"]
 }
