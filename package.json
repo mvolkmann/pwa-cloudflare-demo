@@ -5,6 +5,8 @@
     "check": "tsc --noEmit",
     "clean": "rm -rf public/scripts",
     "compile": "tsc",
+    "build": "bun build ./src/index.ts --outdir public/scripts",
+    "build:release": "bun build --minify --splitting --outdir=public/scripts ./src/index.ts",
     "dev": "wrangler dev src/server.tsx",
     "deploy": "wrangler deploy --minify src/index.tsx",
     "format": "prettier --write '**/*.{css,html,js,ts,tsx}'",
