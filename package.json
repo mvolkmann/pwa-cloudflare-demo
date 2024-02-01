@@ -2,7 +2,8 @@
   "name": "pwa-cloudflare-demo",
   "type": "module",
   "scripts": {
-    "check": "tsc",
+    "check": "tsc --noEmit",
+    "compile": "tsc",
     "dev": "wrangler dev src/index.tsx",
     "deploy": "wrangler deploy --minify src/index.tsx",
     "format": "prettier --write '**/*.{css,html,js,ts,tsx}'",
@@ -15,7 +16,6 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",
-    "@types/bun": "^1.0.0",
     "typescript": "^5.3.3",
     "wrangler": "^3.24.0"
   }

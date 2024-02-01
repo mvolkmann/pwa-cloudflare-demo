@@ -1,13 +1,18 @@
-import {button, td, tr} from './js2html.js';
+import IDBEasy from './idb-easy';
+import {button, el, td, tr} from './js2html';
 
 const storeName = 'dogs';
 
+export type Dog = {
+  id: number;
+  name: string;
+  breed: string;
+};
+
 /**
  * Converts a Dog object to an HTML string.
- * @param {Dog} dog
- * @returns
  */
-function dogToTableRow(dog) {
+function dogToTableRow(dog: Dog): string {
   const {breed, id, name} = dog;
   return tr([
     td(id),
@@ -27,20 +32,16 @@ function dogToTableRow(dog) {
 }
 
 export default class DogController {
-  /**
-   *
-   * @param {any} idbEasy
-   */
-  constructor(idbEasy) {
+  idbEasy: IDBEasy;
+
+  constructor(idbEasy: IDBEasy) {
     this.idbEasy = idbEasy;
   }
 
   /**
    * This initializes the dogs store with sample data.
-   * @param {IDBTransaction} txn
-   * @returns {Promise<void>}
    */
-  async initialize(txn) {
+  async initialize(txn: IDBTransaction): Promise<void> {
     const ie = this.idbEasy;
     try {
       const count = await ie.getRecordCount(storeName, txn);
@@ -60,7 +61,7 @@ export default class DogController {
       );
 
       /** @type {Dog[]} */
-      const dogs = await ie.getAllRecords(storeName, txn);
+      const dogs = (await ie.getAllRecords(storeName, txn)) as Dog[];
       const comet = dogs.find(dog => dog.name === 'Comet');
       if (comet) {
         comet.name = 'Fireball';
@@ -100,11 +101,11 @@ export default class DogController {
   /**
    * This creates the initial stores and indexes in the database
    * or upgrades existing ones.
-   * @param {IDBVersionChangeEvent} event
-   * @returns {Promise<void>}
    */
-  upgrade(event) {
+  upgrade(db: IDBDatabase, event: IDBVersionChangeEvent): Promise<void> {
     const {newVersion, oldVersion} = event;
+    const txn = db.transaction(storeName, 'readwrite');
+
     if (oldVersion === 0) {
       console.log('creating first version of database');
     } else {
@@ -119,11 +120,9 @@ export default class DogController {
     const ie = this.idbEasy;
 
     // If the "dogs" store already exists, delete it.
-    const txn = event.target?.transaction;
-    if (txn) {
-      const names = Array.from(txn.objectStoreNames);
-      if (names.includes(storeName)) ie.deleteStore(storeName);
-    }
+    const names = Array.from(txn.objectStoreNames);
+    console.log('dog-controller.ts upgrade: names =', names);
+    if (names.includes(storeName)) ie.deleteStore(storeName);
 
     // Recreate the "dogs" store and its indexes.
     const store = ie.createStore(storeName, 'id', true);
@@ -135,12 +134,11 @@ export default class DogController {
 
   /**
    * Adds a Dog to the database.
-   * @param {Dog} dog
    * @returns {Promise<Response>} HTML for a new table row.
    */
-  async addDog(dog) {
+  async addDog(dog: Dog): Promise<Response> {
     const ie = this.idbEasy;
-    dog.id = await ie.createRecord('dogs', dog);
+    dog.id = (await ie.createRecord('dogs', dog)) as number;
     const html = dogToTableRow(dog);
     return new Response(html, {
       headers: {'Content-Type': 'application/html'}
@@ -149,10 +147,9 @@ export default class DogController {
 
   /**
    * Deletes a Dog from the database.
-   * @param {number} id
    * @returns {Promise<Response>} HTML for table rows for all remaining dogs.
    */
-  async deleteDog(id) {
+  async deleteDog(id: number): Promise<Response> {
     const ie = this.idbEasy;
     await ie.deleteRecordByKey('dogs', id);
     return this.getDogs();
@@ -160,7 +157,7 @@ export default class DogController {
 
   async getDogs() {
     const ie = this.idbEasy;
-    const dogs = await ie.getAllRecords('dogs');
+    const dogs = (await ie.getAllRecords('dogs')) as Dog[];
     const html = dogs.map(dogToTableRow).join('');
     return new Response(html, {
       headers: {'Content-Type': 'application/html'}

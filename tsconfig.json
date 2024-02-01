@@ -5,13 +5,10 @@
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "lib": ["esnext"],
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "noEmit": true,
-    "paths": {
-      "*": ["./typings/*"]
-    },
+    "lib": ["dom", "esnext"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
     "strict": true,

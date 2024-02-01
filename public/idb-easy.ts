@@ -1,11 +1,11 @@
 /**
  * This returns a Promise that resolves to the result of a given request.
- * @param {IDBRequest} request
- * @param {string} action - for debugging
- * @param {boolean} [suppliedTxn] - indicates whether a transaction was supplied
- * @returns {Promise<any>}
  */
-function requestToPromise(request, action, suppliedTxn = false) {
+function requestToPromise(
+  request: IDBRequest,
+  action: string,
+  suppliedTxn: boolean = false
+): Promise<any> {
   return new Promise((resolve, reject) => {
     request.onsuccess = event => {
       // console.log('succeeded to', action);
@@ -20,52 +20,52 @@ function requestToPromise(request, action, suppliedTxn = false) {
   });
 }
 
+type UpgradeCallback = (
+  request: IDBRequest,
+  event: IDBVersionChangeEvent
+) => void;
+
 export default class IDBEasy {
-  /**
-   * This creates an instance of IDBEasy.
-   * @param {IDBDatabase} db
-   */
-  constructor(db) {
+  db: IDBDatabase;
+
+  constructor(db: IDBDatabase) {
     this.db = db;
   }
 
   /**
    * This deletes all the records in a given store.
-   * @param {string} storeName
-   * @param {IDBTransaction} txn
-   * @returns {Promise<void>}
    */
-  clearStore(storeName, txn) {
+  clearStore(storeName: string, txn?: IDBTransaction): Promise<void> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readwrite');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const request = store.clear();
     return requestToPromise(request, 'clear store', suppliedTxn);
   }
 
   /**
    * This creates an index on a given store.
-   * @param {IDBObjectStore} store
-   * @param {string} indexName
-   * @param {string} keyPath
-   * @param {boolean} [unique]
-   * @returns {void}
    */
-  createIndex(store, indexName, keyPath, unique = false) {
+  createIndex(
+    store: IDBObjectStore,
+    indexName: string,
+    keyPath: string,
+    unique: boolean = false
+  ): void {
     store.createIndex(indexName, keyPath, {unique});
   }
 
   /**
    * This creates a record in a given store.
-   * @param {string} storeName
-   * @param {object} object
-   * @param {IDBTransaction} txn
-   * @returns {Promise<number|string>} key of new record
    */
-  createRecord(storeName, object, txn) {
+  createRecord(
+    storeName: string,
+    object: object,
+    txn?: IDBTransaction
+  ): Promise<number | string> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readwrite');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const request = store.add(object);
     return requestToPromise(request, 'create record', suppliedTxn);
   }
@@ -73,21 +73,19 @@ export default class IDBEasy {
   /**
    * This creates a store in the current database.
    * It must be called within a "versionchange" transaction.
-   * @param {string} storeName
-   * @param {string} keyPath
-   * @param {boolean} [autoIncrement]
-   * @returns {IDBObjectStore}
    */
-  createStore(storeName, keyPath, autoIncrement = false) {
+  createStore(
+    storeName: string,
+    keyPath: string,
+    autoIncrement: boolean = false
+  ): IDBObjectStore {
     return this.db.createObjectStore(storeName, {autoIncrement, keyPath});
   }
 
   /**
    * This deletes a given database
-   * @param {string} dbName
-   * @returns {Promise<void>}
    */
-  static deleteDB(dbName) {
+  static deleteDB(dbName: string): Promise<void> {
     const request = indexedDB.deleteDatabase(dbName);
     return requestToPromise(request, 'delete database');
   }
@@ -95,30 +93,30 @@ export default class IDBEasy {
   /**
    * This deletes all the records in a given store
    * that have a given value in a given index.
-   * @param {string} storeName
-   * @param {string} indexName
-   * @param {any} indexValue
-   * @param {IDBTransaction} txn
-   * @returns {Promise<void>}
    */
-  deleteRecordsByIndex(storeName, indexName, indexValue, txn) {
+  deleteRecordsByIndex(
+    storeName: string,
+    indexName: string,
+    indexValue: any,
+    txn?: IDBTransaction
+  ): Promise<void> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readwrite');
     return new Promise((resolve, reject) => {
-      const store = txn.objectStore(storeName);
+      const store = txn!.objectStore(storeName);
       const index = store.index(indexName);
       const request = index.getAll(indexValue);
       request.onsuccess = event => {
-        const records = event.target.result;
+        const records = request.result;
         for (const record of records) {
-          store.delete(record[store.keyPath]);
+          store.delete(record[store.keyPath as string]);
         }
-        if (!suppliedTxn) txn.commit();
+        if (!suppliedTxn) txn!.commit();
         resolve();
       };
       request.onerror = event => {
         console.error('failed to delete records by index');
-        txn.abort();
+        txn!.abort();
         reject(event);
       };
     });
@@ -127,67 +125,59 @@ export default class IDBEasy {
   /**
    * This delete the record in a given store
    * that has a given key value.
-   * @param {string} storeName
-   * @param {any} key
-   * @param {IDBTransaction} txn
-   * @returns {Promise<void>}
    */
-  deleteRecordByKey(storeName, key, txn) {
+  deleteRecordByKey(
+    storeName: string,
+    key: any,
+    txn?: IDBTransaction
+  ): Promise<void> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readwrite');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const request = store.delete(key);
     return requestToPromise(request, 'delete dog', suppliedTxn);
   }
 
   /**
    * This deletes a given store.
-   * @param {string} storeName
-   * @returns {void}
    */
-  deleteStore(storeName) {
+  deleteStore(storeName: string): void {
     this.db.deleteObjectStore(storeName);
   }
 
   /**
    * This gets all the record in a given store.
-   * @param {string} storeName
-   * @param {IDBTransaction} txn
-   * @returns {Promise<object[]>}
    */
-  getAllRecords(storeName, txn) {
+  getAllRecords(storeName: string, txn?: IDBTransaction): Promise<object[]> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readonly');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const request = store.getAll();
     return requestToPromise(request, 'get all records', suppliedTxn);
   }
 
   /**
    * This gets the record in a given store with a given key value.
-   * @param {string} storeName
-   * @param {any} key
-   * @param {IDBTransaction} txn
-   * @returns {Promise<object>}
    */
-  getRecordByKey(storeName, key, txn) {
+  getRecordByKey(
+    storeName: string,
+    key: any,
+    txn?: IDBTransaction
+  ): Promise<object> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readonly');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const request = store.get(key);
     return requestToPromise(request, 'get record by key', suppliedTxn);
   }
 
   /**
    * This gets the number of records in a given store.
-   * @param {string} storeName
-   * @param {IDBTransaction} txn
-   * @returns {Promise<number>}
    */
-  getRecordCount(storeName, txn) {
+  getRecordCount(storeName: string, txn?: IDBTransaction): Promise<number> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readonly');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const request = store.count();
     return requestToPromise(request, 'get record count', suppliedTxn);
   }
@@ -195,35 +185,29 @@ export default class IDBEasy {
   /**
    * This gets all the records in a given store
    * that have a given value in a given index.
-   * @param {string} storeName
-   * @param {string} indexName
-   * @param {any} indexValue
-   * @param {IDBTransaction} txn
-   * @returns {Promise<object[]>}
    */
-  getRecordsByIndex(storeName, indexName, indexValue, txn) {
+  getRecordsByIndex(
+    storeName: string,
+    indexName: string,
+    indexValue: any,
+    txn?: IDBTransaction
+  ): Promise<object[]> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readonly');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const index = store.index(indexName);
     const request = index.getAll(indexValue);
     return requestToPromise(request, 'get records by index', suppliedTxn);
   }
 
   /**
-   * @callback UpgradeCallback
-   * @param {IDBDatabase} db
-   * @param {IDBVersionChangeEvent} event
-   */
-
-  /**
    * This opens a given database.
-   * @param {string} dbName
-   * @param {number} version
-   * @param {UpgradeCallback} upgrade
-   * @returns {Promise<IDBDatabase>}
    */
-  static openDB(dbName, version, upgrade) {
+  static openDB(
+    dbName: string,
+    version: number,
+    upgrade: UpgradeCallback
+  ): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(dbName, version);
 
@@ -238,8 +222,7 @@ export default class IDBEasy {
       };
 
       request.onupgradeneeded = event => {
-        const db = request.result;
-        upgrade(db, event);
+        upgrade(request, event);
       };
     });
   }
@@ -255,25 +238,31 @@ export default class IDBEasy {
    * @param {IDBTransaction} txn
    * @returns {Promise<void>}
    */
-  updateRecordsByIndex(storeName, indexName, oldValue, newValue, txn) {
+  updateRecordsByIndex(
+    storeName: string,
+    indexName: string,
+    oldValue: any,
+    newValue: any,
+    txn?: IDBTransaction
+  ): Promise<void> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readwrite');
     return new Promise((resolve, reject) => {
-      const store = txn.objectStore(storeName);
+      const store = txn!.objectStore(storeName);
       const index = store.index(indexName);
       const request = index.getAll(oldValue);
-      request.onsuccess = event => {
-        const records = event.target.result;
+      request.onsuccess = (event: Event) => {
+        const records = request.result;
         for (const record of records) {
-          record[index.keyPath] = newValue;
+          record[index.keyPath as string] = newValue;
           store.put(record);
         }
-        if (!suppliedTxn) txn.commit();
+        if (!suppliedTxn) txn!.commit();
         resolve();
       };
       request.onerror = event => {
         console.error('failed to update records by index');
-        txn.abort();
+        txn!.abort();
         reject(event);
       };
     });
@@ -281,15 +270,15 @@ export default class IDBEasy {
 
   /**
    * This inserts or updates a record in a given store.
-   * @param {string} storeName
-   * @param {object} object
-   * @param {IDBTransaction} txn
-   * @returns {Promise<object>}
    */
-  upsertRecord(storeName, object, txn) {
+  upsertRecord(
+    storeName: string,
+    object: object,
+    txn?: IDBTransaction
+  ): Promise<object> {
     const suppliedTxn = Boolean(txn);
     if (!suppliedTxn) txn = this.db.transaction(storeName, 'readwrite');
-    const store = txn.objectStore(storeName);
+    const store = txn!.objectStore(storeName);
     const request = store.put(object);
     return requestToPromise(request, 'update dog', suppliedTxn);
   }

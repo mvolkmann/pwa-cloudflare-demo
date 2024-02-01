@@ -2,6 +2,9 @@
 /// <reference lib="ES2016" />
 /// <reference lib="webworker" />
 
+// See https://joshuatz.com/posts/2021/strongly-typed-service-workers/
+// for details on declaring TypeScript types in service workers.
+
 import DogController from './dog-controller.js';
 import {getRouter} from './dog-router.js';
 import IDBEasy from './idb-easy.js';
@@ -21,7 +24,7 @@ let dogRouter;
 
 const promise = IDBEasy.openDB(dbName, version, (db, event) => {
   const dogController = new DogController(new IDBEasy(db));
-  return dogController.upgrade(event);
+  return dogController.upgrade(db, event);
 });
 
 promise.then(db => {

@@ -38,7 +38,21 @@ async function setupServiceWorker() {
 
 setupServiceWorker();
 
-navigator.serviceWorker.onmessage = event => {
+/*
+navigator.serviceWorker.ready.then(() => {
+  console.log('setup.ts serviceWorker is ready');
+});
+
+const {serviceWorker} = navigator;
+const haveServiceWorker = Boolean(serviceWorker.controller);
+if (!haveServiceWorker) {
+  navigator.serviceWorker.ready.then(() => {
+    location.reload();
+  });
+}
+*/
+
+navigator.serviceWorker.onmessage = (event: any) => {
   // console.log('setup.js: message from service worker =', event.data);
   const haveServiceWorker = Boolean(navigator.serviceWorker.controller);
   if (!haveServiceWorker) {
