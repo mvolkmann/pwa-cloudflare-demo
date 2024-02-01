@@ -6,13 +6,15 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "lib": ["dom", "esnext"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "outDir": "./dist",
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
     "strict": true,
-    "target": "ESNext"
+    "target": "ESNext",
+    "types": ["bun-types", "web"]
   },
   "include": ["./public", "./src"]
 }
