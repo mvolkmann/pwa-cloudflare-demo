@@ -3,10 +3,6 @@
 import {Router} from './tiny-request-router.mjs';
 
 /**
- * @typedef {{id: number, name: string, breed: string}} Dog
- */
-
-/**
  * This creates a Router for dog API endpoints.
  * @param {DogController} dogController
  * @returns {Router}

@@ -8,6 +8,8 @@
     "lib": ["esnext"],
     "module": "ESNext",
     "moduleResolution": "node",
+    "noEmit": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext"

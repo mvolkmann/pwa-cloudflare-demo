@@ -3,12 +3,8 @@ import {button, td, tr} from './js2html.js';
 const storeName = 'dogs';
 
 /**
- * @typedef {{id: number, name: string, breed: string}} Dog
- */
-
-/**
  * Converts a Dog object to an HTML string.
- * @param {Dog} dog
+ * @param {Demo.Dog} dog
  * @returns
  */
 function dogToTableRow(dog) {
@@ -63,7 +59,7 @@ export default class DogController {
         txn
       );
 
-      /** @type {Dog[]} */
+      /** @type {Demo.Dog[]} */
       const dogs = await ie.getAllRecords(storeName, txn);
       const comet = dogs.find(dog => dog.name === 'Comet');
       if (comet) {
@@ -139,7 +135,7 @@ export default class DogController {
 
   /**
    * Adds a Dog to the database.
-   * @param {Dog} dog
+   * @param {Demo.Dog} dog
    * @returns {Promise<Response>} HTML for a new table row.
    */
   async addDog(dog) {

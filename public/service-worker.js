@@ -15,14 +15,7 @@ const version = 1;
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
 /**
- * @typedef {object} Match - returned from tiny-request-router match method
- * @property {string} method
- * @property {string} path
- * @property {() => Response} handler
- */
-
-/**
- * @type {{match: (method: string, pathname: string) => Match }}
+ * @type {{match: (method: string, pathname: string) => Demo.RouterMatch }}
  */
 let dogRouter;
 
