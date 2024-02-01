@@ -17,6 +17,7 @@ export function getRouter(dogController) {
     console.log('dog-router.js post: params =', params);
     console.log('dog-router.js post: request =', request);
     const formData = await request.formData();
+    /** @type Demo.Dog */
     const dog = Object.fromEntries(formData);
     return dogController.addDog(dog);
   });

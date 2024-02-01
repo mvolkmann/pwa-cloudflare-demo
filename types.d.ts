@@ -7,29 +7,81 @@ declare namespace Demo {
 
   class DogController {
     constructor(idbEasy: IDBEasy);
-
-    async initialize(txn: IDBTransaction): Promise<void>;
-
+    addDog(dog: Dog): Promise<Response>;
+    deleteDog(id: number): Promise<Response>;
+    getDogs(): Promise<Response>;
+    initialize(txn: IDBTransaction): Promise<void>;
+    updateSnoopy(): Promise<Response>;
     upgrade(event: IDBVersionChangeEvent): void;
-
-    async addDog(dog: Dog): Promise<Response>;
-
-    async deleteDog(id: number): Promise<Response>;
-
-    async getDogs(): Promise<Response>;
-
-    async updateSnoopy(): Promise<Response>;
   }
 
-  type HandlerType = async (params: object, request: request) => Response;
+  type UpgradeCallback = (
+    db: IDBDatabase,
+    event: IDBVersionChangeEvent
+  ) => void;
 
-  class Router {
-    constructor();
-
-    get(path: string, handler: HandlerType): Response;
-    delete(path: string, handler: HandlerType): Response;
-    patch(path: string, handler: HandlerType): Response;
-    post(path: string, handler: HandlerType): Response;
+  class IDBEasy {
+    constructor(db: IDBDatabase);
+    clearStore(storeName: string, txn: IDBTransaction): Promise<void>;
+    createIndex(
+      store: IDBObjectStore,
+      indexName: string,
+      keyPath: string,
+      unique?: boolean
+    ): void;
+    createRecord(
+      storeName: string,
+      object: object,
+      txn: IDBTransaction
+    ): Promise<number | string>;
+    createStore(
+      storeName: string,
+      keyPath: string,
+      autoIncrement?: boolean
+    ): IDBObjectStore;
+    static deleteDB(dbName: string): Promise<void>;
+    deleteRecordsByIndex(
+      storeName: string,
+      indexName: string,
+      indexValue: any,
+      txn: IDBTransaction
+    ): Promise<void>;
+    deleteRecordByKey(
+      storeName: string,
+      key: any,
+      txn: IDBTransaction
+    ): Promise<void>;
+    deleteStore(storeName: string): void;
+    getAllRecords(storeName: string, txn: IDBTransaction): Promise<object[]>;
+    getRecordByKey(
+      storeName: string,
+      key: any,
+      txn: IDBTransaction
+    ): Promise<object>;
+    getRecordCount(storeName: string, txn: IDBTransaction): Promise<number>;
+    getRecordsByIndex(
+      storeName: string,
+      indexName: string,
+      indexValue: any,
+      txn: IDBTransaction
+    ): Promise<object[]>;
+    static openDB(
+      dbName: string,
+      version: number,
+      upgrade: UpgradeCallback
+    ): Promise<IDBDatabase>;
+    updateRecordsByIndex(
+      storeName: string,
+      indexName: string,
+      oldValue: any,
+      newValue: any,
+      txn: IDBTransaction
+    ): Promise<void>;
+    upsertRecord(
+      storeName: string,
+      object: object,
+      txn: IDBTransaction
+    ): Promise<object>;
   }
 
   type RouterMatch = {
