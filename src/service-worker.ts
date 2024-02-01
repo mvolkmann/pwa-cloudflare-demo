@@ -5,9 +5,9 @@
 // See https://joshuatz.com/posts/2021/strongly-typed-service-workers/
 // for details on declaring TypeScript types in service workers.
 
-import DogController from './dog-controller.js';
-import {getRouter} from './dog-router.js';
-import IDBEasy from './idb-easy.js';
+import DogController from './dog-controller';
+import {getRouter} from './dog-router';
+import IDBEasy from './idb-easy';
 
 const cacheName = 'pwa-demo-v1';
 const dbName = 'myDB';
