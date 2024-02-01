@@ -4,7 +4,7 @@ const storeName = 'dogs';
 
 /**
  * Converts a Dog object to an HTML string.
- * @param {Demo.Dog} dog
+ * @param {Dog} dog
  * @returns
  */
 function dogToTableRow(dog) {
@@ -59,7 +59,7 @@ export default class DogController {
         txn
       );
 
-      /** @type {Demo.Dog[]} */
+      /** @type {Dog[]} */
       const dogs = await ie.getAllRecords(storeName, txn);
       const comet = dogs.find(dog => dog.name === 'Comet');
       if (comet) {
@@ -135,7 +135,7 @@ export default class DogController {
 
   /**
    * Adds a Dog to the database.
-   * @param {Demo.Dog} dog
+   * @param {Dog} dog
    * @returns {Promise<Response>} HTML for a new table row.
    */
   async addDog(dog) {

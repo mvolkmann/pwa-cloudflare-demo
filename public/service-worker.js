@@ -15,7 +15,7 @@ const version = 1;
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
 /**
- * @type {{match: (method: string, pathname: string) => Demo.RouterMatch }}
+ * @type {{match: (method: string, pathname: string) => RouterMatch }}
  */
 let dogRouter;
 

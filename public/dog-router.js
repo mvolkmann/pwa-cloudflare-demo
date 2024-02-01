@@ -3,7 +3,7 @@ import {Router} from './tiny-request-router.mjs';
 
 /**
  * This creates a Router for dog API endpoints.
- * @param {Demo.DogController} dogController
+ * @param {DogController} dogController
  * @returns {Router}
  */
 export function getRouter(dogController) {
@@ -17,7 +17,7 @@ export function getRouter(dogController) {
     console.log('dog-router.js post: params =', params);
     console.log('dog-router.js post: request =', request);
     const formData = await request.formData();
-    /** @type Demo.Dog */
+    /** @type Dog */
     const dog = Object.fromEntries(formData);
     return dogController.addDog(dog);
   });
