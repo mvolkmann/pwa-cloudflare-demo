@@ -212,8 +212,8 @@ export default class IDBEasy {
 
   /**
    * @callback UpgradeCallback
-   * @param {string} dbName
-   * @param {number} version
+   * @param {IDBDatabase} db
+   * @param {IDBVersionChangeEvent} event
    */
 
   /**
