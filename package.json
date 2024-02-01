@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
+    "clean": "rm -rf dist && rm -rf node_modules && rm -rf bun.lock",
     "compile": "tsc",
     "dev": "wrangler dev src/server.tsx",
     "deploy": "wrangler deploy --minify src/index.tsx",
