@@ -62,4 +62,5 @@ app.get('/pokemon-rows', async (c: Context) => {
     </>
   );
 });
+
 export default app;

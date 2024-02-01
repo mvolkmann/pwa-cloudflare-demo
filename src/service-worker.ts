@@ -30,15 +30,14 @@ const promise = IDBEasy.openDB(dbName, version, (db, event) => {
 promise.then(db => {
   const dogController = new DogController(new IDBEasy(db));
   dogRouter = getRouter(dogController);
+  console.log('service-worker.ts : dogRouter =', dogRouter);
 });
 
 /**
  * This deletes all the keys from a given cache.
  * It is not currently used.
- * @param {string} cacheName
- * @returns {Promise<void>}
  */
-async function deleteCache(cacheName) {
+async function deleteCache(cacheName: string): Promise<void> {
   // @type {string[]}
   const keys = await caches.keys();
   await Promise.all(
@@ -48,11 +47,9 @@ async function deleteCache(cacheName) {
 
 /**
  * This gets the body of a request as text.
- * @param {Request} request
- * @returns {Promise<string>} the body text
+ * It is not currently used.
  */
-// This is not currently used.
-async function getBodyText(request) {
+async function getBodyText(request: Request): Promise<string> {
   const {body} = request;
   if (!body) return '';
   const reader = body.getReader();
@@ -68,10 +65,8 @@ async function getBodyText(request) {
 
 /**
  * This gets a resource from the cache or the network.
- * @param {Request} request
- * @returns Response
  */
-async function getResource(request) {
+async function getResource(request: Request): Promise<Response> {
   const log = false;
   const url = new URL(request.url);
   const {href, pathname} = url;
@@ -105,10 +100,8 @@ async function getResource(request) {
 
 /**
  * This determines whether the file at a given pathname should be cached.
- * @param {string} pathname
- * @returns {boolean}
  */
-function shouldCache(pathname) {
+function shouldCache(pathname: string): boolean {
   if (pathname.endsWith('setup.js')) return false;
   if (pathname.endsWith('service-worker.js')) return false;
   const index = pathname.lastIndexOf('.');
