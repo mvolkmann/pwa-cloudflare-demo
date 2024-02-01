@@ -55,15 +55,15 @@ if (!haveServiceWorker) {
 }
 */
 
-navigator.serviceWorker.onmessage = (event: any) => {
+window.navigator.serviceWorker.onmessage = (event: any) => {
   // console.log('setup.js: message from service worker =', event.data);
-  const haveServiceWorker = Boolean(navigator.serviceWorker.controller);
+  const haveServiceWorker = Boolean(window.navigator.serviceWorker.controller);
   if (!haveServiceWorker) {
     // Now that the service worker is installed,
     // reload the page so a GET to /dog will work.
     // The timeout gives the service worker time to really be ready.
     setTimeout(() => {
-      location.reload();
+      window.location.reload();
     }, 100);
   }
 };
