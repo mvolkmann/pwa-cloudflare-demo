@@ -5,10 +5,12 @@ async function setupServiceWorker() {
   }
 
   try {
-
-    const reg = await window.navigator.serviceWorker.register('service-worker.js', {
-      type: 'module'
-    });
+    const reg = await window.navigator.serviceWorker.register(
+      'service-worker.js',
+      {
+        type: 'module'
+      }
+    );
 
     /*
     // TODO: Should you care about these state changes?
