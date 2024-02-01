@@ -27,5 +27,5 @@ export function getRouter(dogController: DogController): typeof Router {
     dogController.deleteDog(Number(params.id))
   );
 
-  return router;
+  return router as unknown as typeof Router;
 }
