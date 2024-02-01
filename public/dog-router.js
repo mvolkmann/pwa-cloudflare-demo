@@ -1,10 +1,9 @@
 // This file defines the routes that the service worker will handle.
-// import DogController from './dog-controller';
 import {Router} from './tiny-request-router.mjs';
 
 /**
  * This creates a Router for dog API endpoints.
- * @param {DogController} dogController
+ * @param {Demo.DogController} dogController
  * @returns {Router}
  */
 export function getRouter(dogController) {
@@ -12,23 +11,21 @@ export function getRouter(dogController) {
 
   router.get('/hello', () => new Response('Hello from service worker!'));
 
-  router.get('/dog', async () => {
-    return dogController.getDogs();
-  });
+  router.get('/dog', async () => dogController.getDogs());
 
   router.post('/dog', async (params, request) => {
+    console.log('dog-router.js post: params =', params);
+    console.log('dog-router.js post: request =', request);
     const formData = await request.formData();
     const dog = Object.fromEntries(formData);
     return dogController.addDog(dog);
   });
 
-  router.put('/dog', async () => {
-    return dogController.updateSnoopy();
-  });
+  router.put('/dog', async () => dogController.updateSnoopy());
 
-  router.delete('/dog/:id', async params => {
-    return dogController.deleteDog(Number(params.id));
-  });
+  router.delete('/dog/:id', async params =>
+    dogController.deleteDog(Number(params.id))
+  );
 
   return router;
 }
