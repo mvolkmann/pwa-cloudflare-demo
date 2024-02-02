@@ -20,10 +20,7 @@ function requestToPromise(
   });
 }
 
-type UpgradeCallback = (
-  request: IDBRequest,
-  event: IDBVersionChangeEvent
-) => void;
+type UpgradeCallback = (db: IDBDatabase, event: IDBVersionChangeEvent) => void;
 
 export default class IDBEasy {
   db: IDBDatabase;
@@ -222,7 +219,8 @@ export default class IDBEasy {
       };
 
       request.onupgradeneeded = event => {
-        upgrade(request, event);
+        const db = request.result;
+        upgrade(db, event);
       };
     });
   }

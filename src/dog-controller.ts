@@ -103,6 +103,7 @@ export default class DogController {
    * or upgrades existing ones.
    */
   upgrade(db: IDBDatabase, event: IDBVersionChangeEvent): Promise<void> {
+    console.log('dog-controller.ts upgrade: db =', db);
     const {newVersion, oldVersion} = event;
     const txn = db.transaction(storeName, 'readwrite');
 
