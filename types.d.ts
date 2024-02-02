@@ -1,3 +1,5 @@
+// TODO: Is JSDoc using this file?
+
 type Dog = {
   id: number;
   name: string;

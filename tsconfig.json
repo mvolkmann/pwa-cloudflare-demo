@@ -13,7 +13,7 @@
       "*": ["./typings/*"]
     },
     "resolveJsonModule": true,
-    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
     "strict": true,
     "target": "ESNext"
   },
