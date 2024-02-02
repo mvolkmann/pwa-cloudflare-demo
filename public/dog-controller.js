@@ -3,6 +3,13 @@ import {button, td, tr} from './js2html.js';
 const storeName = 'dogs';
 
 /**
+ * @typedef {object} Dog
+ * @property {number} id
+ * @property {string} name
+ * @property {string} breed
+ */
+
+/**
  * Converts a Dog object to an HTML string.
  * @param {Dog} dog
  * @returns
@@ -28,7 +35,7 @@ function dogToTableRow(dog) {
 
 export default class DogController {
   /**
-   *
+   * @constructor
    * @param {any} idbEasy
    */
   constructor(idbEasy) {
