@@ -6,7 +6,7 @@ async function setupServiceWorker() {
 
   try {
     const reg = await window.navigator.serviceWorker.register(
-      'scripts/service-worker.js',
+      'scripts/bundle.js',
       {
         type: 'module'
       }
