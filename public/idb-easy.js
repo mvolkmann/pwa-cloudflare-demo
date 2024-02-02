@@ -263,9 +263,12 @@ export default class IDBEasy {
       const index = store.index(indexName);
       const request = index.getAll(oldValue);
       request.onsuccess = event => {
-        const records = event.target.result;
+        /** @type {object[]} */
+        const records = event.target?.result ?? [];
         for (const record of records) {
-          record[index.keyPath] = newValue;
+          let {keyPath} = index;
+          if (Array.isArray(keyPath)) keyPath = keyPath[0];
+          record[keyPath] = newValue;
           store.put(record);
         }
         if (!suppliedTxn) txn.commit();
