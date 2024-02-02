@@ -38,7 +38,7 @@ async function setupServiceWorker() {
 
 setupServiceWorker();
 
-navigator.serviceWorker.onmessage = event => {
+navigator.serviceWorker.onmessage = () => {
   // console.log('setup.js: message from service worker =', event.data);
   const haveServiceWorker = Boolean(navigator.serviceWorker.controller);
   if (!haveServiceWorker) {
