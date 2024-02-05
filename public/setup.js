@@ -41,6 +41,14 @@ async function setupServiceWorker() {
       }
     });
 
+    // TO TEST THIS:
+    // - open Chrome DevTools
+    // - click the "Application" tab
+    // - click "Service Workers"
+    // - enter text for a push message
+    // - click the "Push" button
+    // - a browser popup should appear
+
     /*
     // TODO: Should you care about these state changes?
     reg.onupdatefound = () => {
