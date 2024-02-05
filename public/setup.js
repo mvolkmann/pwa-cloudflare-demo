@@ -9,6 +9,38 @@ async function setupServiceWorker() {
       type: 'module'
     });
 
+    const subscription = reg.pushManager.subscribe({
+      applicationServerKey: '?',
+      userVisibleOnly: true
+    });
+    const info = {
+      endpoint: '?',
+      // This is the server public key.
+      // When the server sends a push notification,
+      // it must encrypt it with this public key.
+      keys: {
+        auth: '?',
+        p256dh: '?'
+      }
+    };
+    const response = await fetch('/push-subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(info)
+    });
+    const data = await response.json();
+    console.log('setup.js: data =', data);
+
+    Notification.requestPermission(result => {
+      console.log('permission result =', result);
+      if (result === 'granted') {
+        console.log('Notification permission was granted.');
+        // configurePushSub(); // Write your custom function that pushes your message
+      } else {
+        console.log('Notification permission was not granted.');
+      }
+    });
+
     /*
     // TODO: Should you care about these state changes?
     reg.onupdatefound = () => {

@@ -163,4 +163,6 @@ self.addEventListener('fetch', async event => {
 // TODO: Get this type from https://www.npmjs.com/package/@types/serviceworker?
 self.addEventListener('push', async event => {
   console.log('service-worker.js push: event =', event);
+  const title = event.data.text();
+  event.waitUntil(self.registration.showNotification(title));
 });

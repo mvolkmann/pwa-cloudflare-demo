@@ -62,4 +62,11 @@ app.get('/pokemon-rows', async (c: Context) => {
     </>
   );
 });
+
+app.post('/push-subscribe', async (c: Context) => {
+  const object = await c.req.json();
+  console.log('server.tsx push-subscribe: object =', object);
+  return c.json({what: 'should this return?'});
+});
+
 export default app;
