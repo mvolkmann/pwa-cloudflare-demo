@@ -1,5 +1,7 @@
 import {Context, Hono} from 'hono';
 import {serveStatic} from 'hono/cloudflare-workers';
+// TODO: Add to notes that this must be installed with `bun add web-push`.
+// const webPush = require('web-push');
 
 type Pokemon = {
   name: string;
@@ -10,6 +12,21 @@ const POKEMON_IMAGE_URL_PREFIX =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
 const POKEMON_URL_PREFIX = 'https://pokeapi.co/api/v2/pokemon-species';
 const ROWS_PER_PAGE = 10;
+
+let subscription;
+
+function pushMessage(payload: string) {
+  if (subscription) {
+    const options = {
+      gcmAPIKey: '?',
+      TTL: 60 // max time in seconds for push service to retry delivery
+    };
+    // TODO: Get this to work with Bun.
+    // webPush.sendNotification(subscription, payload, options);
+  } else {
+    console.error('server.tsx: pushMessage called with no subscription');
+  }
+}
 
 const app = new Hono();
 
@@ -64,8 +81,8 @@ app.get('/pokemon-rows', async (c: Context) => {
 });
 
 app.post('/push-subscribe', async (c: Context) => {
-  const object = await c.req.json();
-  console.log('server.tsx push-subscribe: object =', object);
+  subscription = await c.req.json();
+  console.log('server.tsx push-subscribe: subscription =', subscription);
   return c.json({what: 'should this return?'});
 });
 

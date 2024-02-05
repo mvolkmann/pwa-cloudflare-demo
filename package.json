@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "hono": "^3.12.7",
-    "tiny-request-router": "^1.2.2"
+    "tiny-request-router": "^1.2.2",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",

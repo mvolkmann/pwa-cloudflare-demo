@@ -9,28 +9,42 @@ async function setupServiceWorker() {
       type: 'module'
     });
 
-    const subscription = reg.pushManager.subscribe({
-      applicationServerKey: '?',
-      userVisibleOnly: true
-    });
-    const info = {
-      endpoint: '?',
-      // This is the server public key.
-      // When the server sends a push notification,
-      // it must encrypt it with this public key.
-      keys: {
-        auth: '?',
-        p256dh: '?'
-      }
-    };
-    const response = await fetch('/push-subscribe', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(info)
-    });
-    const data = await response.json();
-    console.log('setup.js: data =', data);
+    let subscription = reg.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = reg.pushManager.subscribe({
+        applicationServerKey: '?',
+        userVisibleOnly: true
+      });
+      console.log('setup.js: subscription =', subscription);
+      const info = {
+        endpoint: '?',
+        // This is the server public key.
+        // When the server sends a push notification,
+        // it must encrypt it with this public key.
+        keys: {
+          auth: '?',
+          p256dh: '?'
+        }
+      };
+      const response = await fetch('/push-subscribe', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(info)
+      });
+      const data = await response.json();
+      console.log('setup.js: data =', data);
+    }
 
+    // To revoke this permission in Chrome:
+    // TODO: I'm not sure this is correct.
+    // - click the ellipsis menu button in the upper-right
+    // - click "Settings"
+    // - click "Privacy and security"
+    // - click "Site settings"
+    // - click "Notifications"
+    // - click "http://localhost:8787"
+    // - under "Permissions", change the value for "Notifications"
+    //   from "Allow" to "Ask (default)"
     Notification.requestPermission(result => {
       console.log('permission result =', result);
       if (result === 'granted') {
