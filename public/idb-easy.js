@@ -20,6 +20,9 @@ function requestToPromise(request, action, suppliedTxn = false) {
   });
 }
 
+/**
+ * Instances of this class make it easier to work with IndexedDB.
+ */
 export default class IDBEasy {
   /**
    * This creates an instance of IDBEasy.

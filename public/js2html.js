@@ -1,3 +1,8 @@
+/**
+ * This defines functions that make it easy to
+ * generate strings of HTML from JavaScript.
+ */
+
 // See https://joshuatz.com/posts/2021/strongly-typed-service-workers/
 // for details on declaring TypeScript types in service workers.
 

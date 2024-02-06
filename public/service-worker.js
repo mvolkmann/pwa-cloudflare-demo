@@ -31,16 +31,7 @@ const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
  */
 let dogRouter;
 
-const promise = IDBEasy.openDB(dbName, version, (db, event) => {
-  const dogController = new DogController(new IDBEasy(db));
-  dogController.upgrade(event);
-});
-
-// Top-level await is not allowed in service workers.
-promise.then(upgradedDB => {
-  const dogController = new DogController(new IDBEasy(upgradedDB));
-  dogRouter = getRouter(dogController);
-});
+setDogRouter();
 
 /**
  * This deletes all the keys from a given cache.
@@ -111,6 +102,23 @@ async function getResource(request) {
   }
 
   return resource;
+}
+
+/**
+ * This sets the dogRouter variable to a Router
+ * that is used to handle API requests for dogs.
+ */
+function setDogRouter() {
+  const promise = IDBEasy.openDB(dbName, version, (db, event) => {
+    const dogController = new DogController(new IDBEasy(db));
+    dogController.upgrade(event);
+  });
+
+  // Top-level await is not allowed in service workers.
+  promise.then(upgradedDB => {
+    const dogController = new DogController(new IDBEasy(upgradedDB));
+    dogRouter = getRouter(dogController);
+  });
 }
 
 /**

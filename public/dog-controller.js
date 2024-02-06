@@ -1,5 +1,6 @@
 import {button, td, tr} from './js2html.js';
 
+// This is the name of an IndexedDB store.
 const storeName = 'dogs';
 
 /**
@@ -33,6 +34,10 @@ function dogToTableRow(dog) {
   ]);
 }
 
+/**
+ * This implements methods to create, populate, and interact
+ * with an IndexedDB database.
+ */
 export default class DogController {
   /**
    * @constructor
@@ -43,19 +48,18 @@ export default class DogController {
   }
 
   /**
-   * This initializes the dogs store with sample data.
+   * This initializes the dogs store with sample data if it is currently empty.
    * @param {IDBTransaction} txn
    * @returns {Promise<void>}
    */
   async initialize(txn) {
     const ie = this.idbEasy;
     try {
+      // Determine if the store is empty.
       const count = await ie.getRecordCount(storeName, txn);
       console.log('dog-controller.js initialize: count =', count);
       if (count > 0) return;
 
-      // Unless the database is deleted and recreated,
-      // these records will be recreated with new key values.
       await ie.createRecord(storeName, {name: 'Comet', breed: 'Whippet'}, txn);
       await ie.createRecord(
         storeName,
@@ -66,6 +70,8 @@ export default class DogController {
         txn
       );
 
+      // This code is only here to provide an example of
+      // updating an existing record using the upsertRecord method.
       /** @type {Dog[]} */
       const dogs = await ie.getAllRecords(storeName, txn);
       const comet = dogs.find(dog => dog.name === 'Comet');
@@ -74,6 +80,8 @@ export default class DogController {
         await ie.upsertRecord(storeName, comet, txn);
       }
 
+      // This code is only here to provide an example of
+      // adding a new record using the upsertRecord method.
       await ie.upsertRecord(
         storeName,
         {
@@ -84,9 +92,13 @@ export default class DogController {
       );
 
       /*
+      // This code is only here to demonstrate
+      // getting an existing record by its key.
       const oscar = await ie.getRecordByKey(storeName, 2, txn);
       console.log('oscar =', oscar);
 
+      // This code is only here to demonstrate using an index
+      // to get all the records with a given index value.
       const whippets = await ie.getRecordsByIndex(
         storeName,
         'breed-index',
@@ -95,6 +107,8 @@ export default class DogController {
       );
       console.log('whippets =', whippets);
 
+      // This code is only here to demonstrate
+      // deleting an existing record by its key.
       await ie.deleteRecordByKey(storeName, 2, txn);
       const remainingDogs = await ie.getAllRecords('dogs', txn);
       console.log('remainingDogs =', remainingDogs);
@@ -107,6 +121,7 @@ export default class DogController {
   /**
    * This creates the initial stores and indexes in the database
    * or upgrades existing ones.
+   * Then it calls the initialize method to add sample data.
    * @param {IDBVersionChangeEvent} event
    */
   upgrade(event) {
