@@ -51,7 +51,7 @@ export default class DogController {
     const ie = this.idbEasy;
     try {
       const count = await ie.getRecordCount(storeName, txn);
-      console.log('dogs.js initialize: count =', count);
+      console.log('dog-controller.js initialize: count =', count);
       if (count > 0) return;
 
       // Unless the database is deleted and recreated,
@@ -108,7 +108,6 @@ export default class DogController {
    * This creates the initial stores and indexes in the database
    * or upgrades existing ones.
    * @param {IDBVersionChangeEvent} event
-   * @returns {Promise<void>}
    */
   upgrade(event) {
     const {newVersion, oldVersion} = event;
@@ -137,7 +136,7 @@ export default class DogController {
     ie.createIndex(store, 'breed-index', 'breed');
     ie.createIndex(store, 'name-index', 'name');
 
-    return this.initialize(txn);
+    this.initialize(txn);
   }
 
   /**

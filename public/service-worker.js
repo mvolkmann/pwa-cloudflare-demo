@@ -1,3 +1,4 @@
+//TODO: Which of these lines are really required?
 /// <reference no-default-lib="true"/>
 /// <reference lib="ES2016" />
 /// <reference lib="webworker" />
@@ -10,7 +11,7 @@ const cacheName = 'pwa-demo-v1';
 const dbName = 'myDB';
 const version = 1;
 
-// See src/.env.
+// This value was copied from the .env file.
 const publicKey =
   'BMx9QagkN_EidkH7D8jdZaz5BM2Hh-d3RQ5W1iWOfh32KRdbxu7fATv5ozLPUfQasRIZo7JQ6ULGVKgfUX3HO7A';
 
@@ -19,17 +20,25 @@ const publicKey =
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
 
 /**
+ * @typedef {object} RouterMatch
+ * @property {string} method;
+ * @property {string} path;
+ * @property {() => Response} handler;
+ */
+
+/**
  * @type {{match: (method: string, pathname: string) => RouterMatch }}
  */
 let dogRouter;
 
 const promise = IDBEasy.openDB(dbName, version, (db, event) => {
   const dogController = new DogController(new IDBEasy(db));
-  return dogController.upgrade(event);
+  dogController.upgrade(event);
 });
 
-promise.then(db => {
-  const dogController = new DogController(new IDBEasy(db));
+// Top-level await is not allowed in service workers.
+promise.then(upgradedDB => {
+  const dogController = new DogController(new IDBEasy(upgradedDB));
   dogRouter = getRouter(dogController);
 });
 
@@ -127,7 +136,12 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-//TODO: Is there an easier way to do this?
+/**
+ * This converts a base64 string to a Uint8Array.
+ * TODO: Is there an easier way to do this?
+ * @param {string} base64String
+ * @returns a Uint8Array
+ */
 function base64StringToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -144,20 +158,34 @@ function base64StringToUint8Array(base64String) {
   return outputArray;
 }
 
+/**
+ * @typedef {object} SubscriptionKeys
+ * @property auth {string}
+ * @property p256dh {string}
+ */
+
+/**
+ * @typedef {object} Subscription
+ * @property endpoint {string}
+ * @property expirationTime {number | null}
+ * @property keys {SubscriptionKeys}
+ */
+
+/**
+ * This saves a subscription on the server
+ * so it can send push notifications to this client.
+ * @param {Subscription} subscription
+ * @returns
+ */
 async function saveSubscription(subscription) {
-  console.log(
-    'service-worker.js saveSubscription: subscription =',
-    subscription
-  );
   try {
-    const res = await fetch('/save-subscription', {
+    await fetch('/save-subscription', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(subscription)
     });
-    return res.json();
   } catch (error) {
-    console.error('service-worker.js saveSubscription: error =', error);
+    console.error('service-worker.js saveSubscription:', error);
   }
 }
 
@@ -175,8 +203,7 @@ self.addEventListener('activate', async event => {
     applicationServerKey: base64StringToUint8Array(publicKey),
     userVisibleOnly: true // false allows silent push notifications
   });
-  const res = await saveSubscription(subscription);
-  console.log('service-worker.js activate: res =', res);
+  await saveSubscription(subscription);
 
   try {
     // Let browser clients know that the service worker is ready.
@@ -197,9 +224,7 @@ self.addEventListener('fetch', async event => {
   const {pathname} = url;
   // console.log('service-worker.js fetch: pathname =', pathname);
 
-  // const log = request.method === 'GET' && pathname === '/dog';
   const match = dogRouter.match(request.method, pathname);
-  // if (log) console.log('match for GET /dog =', match);
   const promise = match
     ? match.handler(match.params, request)
     : getResource(request);

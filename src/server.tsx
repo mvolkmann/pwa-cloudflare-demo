@@ -112,9 +112,7 @@ app.post('/save-subscription', async (c: Context) => {
   //TODO: Save these in a SQLite database so
   //TODO: they are not lost when the server restarts.
   subscriptions.push(subscription);
-
-  console.log('server.tsx push-subscribe: subscription =', subscription);
-  return c.json({what: 'should this return?'});
+  return c.text('');
 });
 
 export default app;

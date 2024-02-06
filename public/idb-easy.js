@@ -227,7 +227,8 @@ export default class IDBEasy {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(dbName, version);
 
-      request.onsuccess = async event => {
+      // This is getting called twice, which seems to be a bug.
+      request.onsuccess = event => {
         const db = request.result;
         resolve(db);
       };

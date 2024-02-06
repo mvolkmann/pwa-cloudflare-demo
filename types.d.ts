@@ -81,9 +81,3 @@ class IDBEasy {
     txn: IDBTransaction
   ): Promise<object>;
 }
-
-type RouterMatch = {
-  method: string;
-  path: string;
-  handler: () => Response;
-};
