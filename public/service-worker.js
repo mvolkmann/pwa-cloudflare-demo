@@ -236,20 +236,22 @@ self.addEventListener('activate', async event => {
   try {
     const clients = await self.clients.matchAll({includeUncontrolled: true});
     for (const client of clients) {
-      client.postMessage('service worker ready');
+      // setup.js listens for this message.
+      client.postMessage('ready');
     }
   } catch (error) {
-    console.error('setup.js activate: failed to notify clients:', error);
+    console.error('service-worker.js failed to notify clients:', error);
   }
 });
 
-// This is not used for the initial load of a PWA,
-// only for subsequent loads.
+/**
+ * This registers a listener for the "fetch" event of this service worker.
+ * It responds with a resource for accessing data at a requested URL.
+ */
 self.addEventListener('fetch', async event => {
   const {request} = event;
   const url = new URL(request.url);
   const {pathname} = url;
-  // console.log('service-worker.js fetch: pathname =', pathname);
 
   const match = dogRouter.match(request.method, pathname);
   const promise = match
@@ -258,8 +260,12 @@ self.addEventListener('fetch', async event => {
   event.respondWith(promise);
 });
 
-// For testing, this can be triggered from the Chrome DevTools Application tab.
-// TODO: Get this type from https://www.npmjs.com/package/@types/serviceworker?
+/**
+ * This registers a listener for the "push" event of this service worker.
+ * One way to test this is to trigger a push from Chrome DevTools.
+ * Click the "Application" tab, click "Service workers" in the left nav,
+ * enter a message in the Push input, and click the "Push" button.
+ */
 self.addEventListener('push', async event => {
   console.log('service-worker.js push: event =', event);
   const text = event.data.text();
