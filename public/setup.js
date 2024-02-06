@@ -8,13 +8,9 @@ async function setupServiceWorker() {
   try {
     // Register the service worker.
     // If it is already registered, information about it will be returned.
-    const reg = await navigator.serviceWorker.register('service-worker.js', {
+    await navigator.serviceWorker.register('service-worker.js', {
       type: 'module'
     });
-
-    // This demonstrates displaying a push notification
-    // after the service worker is registered.
-    reg.showNotification('A service worker was registered.');
   } catch (error) {
     console.error('setup.js setupServiceWorker registered failed:', error);
   }
@@ -68,6 +64,7 @@ navigator.serviceWorker.onmessage = event => {
 async function requestNotificationPermission() {
   const permission = await Notification.requestPermission();
   if (permission === 'granted') {
+    // TODO: Run the code in the service worker to register with the push manager!
     // This message will appear in a popup.
     new Notification('Notifications are enabled.');
   } else {

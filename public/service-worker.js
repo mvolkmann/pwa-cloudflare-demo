@@ -224,23 +224,27 @@ self.addEventListener('activate', async event => {
   // const estimate = await navigator.storage.estimate();
   // console.log('service-worker.js: storage estimate =', estimate);
 
-  // Subscribe to receive push notifications.
-  const subscription = await self.registration.pushManager.subscribe({
-    applicationServerKey: base64StringToUint8Array(publicKey),
-    userVisibleOnly: true // false allows silent push notifications
-  });
-  // Save the subscription on the server.
-  await saveSubscription(subscription);
-
-  // Let browser clients know that the service worker is ready.
   try {
+    //TODO: This fails if the user has no already granted permission
+    //TODO: to receive push notifications.
+    //TODO: Only do this when they grant permission!
+    //TODO: See the TODO in setup.js!
+    // Subscribe to receive push notifications.
+    const subscription = await self.registration.pushManager.subscribe({
+      applicationServerKey: base64StringToUint8Array(publicKey),
+      userVisibleOnly: true // false allows silent push notifications
+    });
+    // Save the subscription on the server.
+    await saveSubscription(subscription);
+
+    // Let browser clients know that the service worker is ready.
     const clients = await self.clients.matchAll({includeUncontrolled: true});
     for (const client of clients) {
       // setup.js listens for this message.
       client.postMessage('ready');
     }
   } catch (error) {
-    console.error('service-worker.js failed to notify clients:', error);
+    console.error('service-worker.js:', error);
   }
 });
 

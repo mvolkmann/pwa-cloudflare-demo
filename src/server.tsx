@@ -27,6 +27,7 @@ const ROWS_PER_PAGE = 10;
 let subscriptions: any[] = [];
 
 // This demonstrates triggering push notifications from a server.
+/*
 let count = 0;
 setInterval(() => {
   if (subscriptions.length) {
@@ -34,6 +35,7 @@ setInterval(() => {
     pushNotification(`count = ${count}`);
   }
 }, 5000);
+*/
 
 //-----------------------------------------------------------------------------
 
