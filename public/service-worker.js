@@ -145,12 +145,20 @@ function base64StringToUint8Array(base64String) {
 }
 
 async function saveSubscription(subscription) {
-  const res = await fetch('http://localhost:8787/save-subscription', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(subscription)
-  });
-  return res.json();
+  console.log(
+    'service-worker.js saveSubscription: subscription =',
+    subscription
+  );
+  try {
+    const res = await fetch('/save-subscription', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(subscription)
+    });
+    return res.json();
+  } catch (error) {
+    console.error('service-worker.js saveSubscription: error =', error);
+  }
 }
 
 self.addEventListener('activate', async event => {

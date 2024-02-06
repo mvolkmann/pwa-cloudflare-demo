@@ -1,7 +1,17 @@
 import {Context, Hono} from 'hono';
-import {serveStatic} from 'hono/cloudflare-workers';
+import {serveStatic} from 'hono/bun';
+//TODO: web-push does not currently work with Cloudflare Workers!
+//TODO: See https://github.com/web-push-libs/web-push/issues/718
+//TODO: and https://github.com/aynh/cf-webpush.
+// import {serveStatic} from 'hono/cloudflare-workers';
+
 // TODO: Add to notes that this must be installed with `bun add web-push`.
 const webPush = require('web-push');
+webPush.setVapidDetails(
+  'mailto:r.mark.volkmann@gmail.com',
+  process.env.WEB_PUSH_PUBLIC_KEY,
+  process.env.WEB_PUSH_PRIVATE_KEY
+);
 
 type Pokemon = {
   name: string;
@@ -13,13 +23,8 @@ const POKEMON_IMAGE_URL_PREFIX =
 const POKEMON_URL_PREFIX = 'https://pokeapi.co/api/v2/pokemon-species';
 const ROWS_PER_PAGE = 10;
 
-webPush.setVapidDetails(
-  'mailto:r.mark.volkmann@gmail.com',
-  process.env.PUBLIC_KEY,
-  process.env.PRIVATE_KEY
-);
-
-let subscriptions = [];
+//TODO: Get this TypeScript type.
+let subscriptions: any[] = [];
 
 function pushNotification(payload: string) {
   if (subscriptions.length) {
@@ -27,7 +32,6 @@ function pushNotification(payload: string) {
       // gcmAPIKey: '?',
       // TTL: 60 // max time in seconds for push service to retry delivery
     };
-    // TODO: Get this to work with Bun.
     for (const subscription of subscriptions) {
       webPush.sendNotification(subscription, payload, options);
     }
@@ -39,7 +43,7 @@ function pushNotification(payload: string) {
 const app = new Hono();
 
 // Serve static files from the public directory.
-app.use('/*', serveStatic({root: './'}));
+app.use('/*', serveStatic({root: './public'}));
 
 function TableRow(page: number, pokemon: Pokemon, isLast: boolean) {
   const attributes = isLast

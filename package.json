@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "check": "tsc",
-    "dev": "wrangler dev src/server.tsx",
+    "dev": "bun run --watch src/server.tsx",
+    "dev-cf": "wrangler dev src/server.tsx",
     "deploy": "wrangler deploy --minify src/server.tsx",
     "format": "prettier --write '**/*.{css,html,js,ts,tsx}'",
     "reinstall": "rm -rf node_modules bun.lockb && bun install",
