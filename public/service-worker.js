@@ -123,6 +123,34 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
+//TODO: Is there an easier way to do this?
+function base64StringToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+const publicKey =
+  'BMx9QagkN_EidkH7D8jdZaz5BM2Hh-d3RQ5W1iWOfh32KRdbxu7fATv5ozLPUfQasRIZo7JQ6ULGVKgfUX3HO7A';
+
+async function saveSubscription(subscription) {
+  const res = await fetch('http://localhost:8787/save-subscription', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(subscription)
+  });
+  return res.json();
+}
+
 self.addEventListener('activate', async event => {
   console.log('service-worker.js: activating');
   // event.waitUntil(deleteCache(cacheName));
@@ -130,6 +158,17 @@ self.addEventListener('activate', async event => {
   // Safari says "The operation is not supported." for the "estimate" method.
   // const estimate = await navigator.storage.estimate();
   // console.log('setup.js: storage estimate =', estimate);
+
+  const subscription = await self.registration.pushManager.subscribe({
+    // To get this public key,
+    // enter "npx web-push generate-vapid-keys" in a terminal.
+    // vapid stands for "Voluntary APplication server IDentification"
+    // and is used for Web Push.
+    applicationServerKey: base64StringToUint8Array(publicKey),
+    userVisibleOnly: true // false allows silent push notifications
+  });
+  const res = await saveSubscription(subscription);
+  console.log('service-worker.js activate: res =', res);
 
   try {
     // Let browser clients know that the service worker is ready.

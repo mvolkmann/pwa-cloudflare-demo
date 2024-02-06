@@ -11,6 +11,9 @@ async function setupServiceWorker() {
       type: 'module'
     });
 
+    // TODO: Why doesn't this work?
+    // reg.showNotification('Can you see this?');
+
     // Get the existing subscription for push notifications.
     let subscription = reg.pushManager.getSubscription();
     if (!subscription) {
