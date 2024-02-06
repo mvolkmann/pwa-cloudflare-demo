@@ -269,7 +269,7 @@ self.addEventListener('fetch', async event => {
  * Push notifications automatically disappear after about five seconds.
  */
 self.addEventListener('push', async event => {
-  console.log('service-worker.js push: event =', event);
+  // console.log('service-worker.js push: event =', event);
   const text = event.data.text();
   //TODO: How can you specify the icon to appear in the push notification?
   self.registration.showNotification('My Title', {body: text});

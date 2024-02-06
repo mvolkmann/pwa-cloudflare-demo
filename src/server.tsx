@@ -26,11 +26,21 @@ const ROWS_PER_PAGE = 10;
 //TODO: Get this TypeScript type.
 let subscriptions: any[] = [];
 
+// This demonstrates triggering push notifications from a server.
+let count = 0;
+setInterval(() => {
+  if (subscriptions.length) {
+    count++;
+    pushNotification(`count = ${count}`);
+  }
+}, 5000);
+
+//-----------------------------------------------------------------------------
+
 function pushNotification(payload: string) {
   if (subscriptions.length) {
     const options = {
-      // gcmAPIKey: '?',
-      // TTL: 60 // max time in seconds for push service to retry delivery
+      TTL: 60 // max time in seconds for push service to retry delivery
     };
     for (const subscription of subscriptions) {
       webPush.sendNotification(subscription, payload, options);
@@ -40,12 +50,7 @@ function pushNotification(payload: string) {
   }
 }
 
-const app = new Hono();
-
-// Serve static files from the public directory.
-app.use('/*', serveStatic({root: './public'}));
-
-function TableRow(page: number, pokemon: Pokemon, isLast: boolean) {
+function tableRow(page: number, pokemon: Pokemon, isLast: boolean) {
   const attributes = isLast
     ? {
         'hx-trigger': 'revealed',
@@ -69,6 +74,16 @@ function TableRow(page: number, pokemon: Pokemon, isLast: boolean) {
   );
 }
 
+//-----------------------------------------------------------------------------
+
+const app = new Hono();
+
+// Serve static files from the public directory.
+app.use('/*', serveStatic({root: './public'}));
+
+/**
+ * This gets HTML table rows for a "page" of Pokemon.
+ */
 app.get('/pokemon-rows', async (c: Context) => {
   const page = c.req.query('page');
   if (!page) throw new Error('page query parameter is required');
@@ -86,19 +101,17 @@ app.get('/pokemon-rows', async (c: Context) => {
     <>
       {pokemonList.map((pokemon, index) => {
         const isLast = index === ROWS_PER_PAGE - 1;
-        return TableRow(pageNumber, pokemon, isLast);
+        return tableRow(pageNumber, pokemon, isLast);
       })}
     </>
   );
 });
 
-// To test this, open a new browser tab and
-// browse localhost: 8787 / push - notification.
-app.get('/push-notification', async (c: Context) => {
-  pushNotification('Hello from the server!');
-  return c.text('push notification sent');
-});
-
+/**
+ * This saves a push notification subscription.
+ * The `pushNotification` function above sends push notifications
+ * to all saved subscriptions.
+ */
 app.post('/save-subscription', async (c: Context) => {
   const subscription = await c.req.json();
   //TODO: Save these in a SQLite database so
