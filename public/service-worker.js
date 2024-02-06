@@ -10,6 +10,10 @@ const cacheName = 'pwa-demo-v1';
 const dbName = 'myDB';
 const version = 1;
 
+// See src/.env.
+const publicKey =
+  'BMx9QagkN_EidkH7D8jdZaz5BM2Hh-d3RQ5W1iWOfh32KRdbxu7fATv5ozLPUfQasRIZo7JQ6ULGVKgfUX3HO7A';
+
 // We aren't currently caching .css files and certain .js files
 // because we want changes to be reflected without clearing the cache.
 const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
@@ -139,8 +143,6 @@ function base64StringToUint8Array(base64String) {
 
   return outputArray;
 }
-const publicKey =
-  'BMx9QagkN_EidkH7D8jdZaz5BM2Hh-d3RQ5W1iWOfh32KRdbxu7fATv5ozLPUfQasRIZo7JQ6ULGVKgfUX3HO7A';
 
 async function saveSubscription(subscription) {
   const res = await fetch('http://localhost:8787/save-subscription', {
@@ -162,8 +164,6 @@ self.addEventListener('activate', async event => {
   const subscription = await self.registration.pushManager.subscribe({
     // To get this public key,
     // enter "npx web-push generate-vapid-keys" in a terminal.
-    // vapid stands for "Voluntary APplication server IDentification"
-    // and is used for Web Push.
     applicationServerKey: base64StringToUint8Array(publicKey),
     userVisibleOnly: true // false allows silent push notifications
   });
@@ -202,6 +202,7 @@ self.addEventListener('fetch', async event => {
 // TODO: Get this type from https://www.npmjs.com/package/@types/serviceworker?
 self.addEventListener('push', async event => {
   console.log('service-worker.js push: event =', event);
-  const title = event.data.text();
-  event.waitUntil(self.registration.showNotification(title));
+  const text = event.data.text();
+  // event.waitUntil(self.registration.showNotification('My Title', {body: text}));
+  self.registration.showNotification('My Title', {body: text});
 });
