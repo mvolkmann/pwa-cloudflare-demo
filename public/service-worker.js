@@ -27,122 +27,14 @@ const fileExtensionsToCache = ['jpg', 'js', 'json', 'png', 'webp'];
  */
 
 /**
+ * This is a Router for dog API endpoints.
  * @type {{match: (method: string, pathname: string) => RouterMatch }}
  */
 let dogRouter;
 
 setDogRouter();
 
-/**
- * This deletes all the keys from a given cache.
- * It is not currently used.
- * @param {string} cacheName
- * @returns {Promise<void>}
- */
-async function deleteCache(cacheName) {
-  // @type {string[]}
-  const keys = await caches.keys();
-  await Promise.all(
-    keys.map(key => (key === cacheName ? null : caches.delete(key)))
-  );
-}
-
-/**
- * This gets the body of a request as text.
- * @param {Request} request
- * @returns {Promise<string>} the body text
- */
-// This is not currently used.
-async function getBodyText(request) {
-  const {body} = request;
-  if (!body) return '';
-  const reader = body.getReader();
-  let result = '';
-  while (true) {
-    const {done, value} = await reader.read();
-    const text = new TextDecoder().decode(value);
-    result += text;
-    if (done) break;
-  }
-  return result;
-}
-
-/**
- * This gets a resource from the cache or the network.
- * @param {Request} request
- * @returns Response
- */
-async function getResource(request) {
-  const log = false;
-  const url = new URL(request.url);
-  const {href, pathname} = url;
-
-  // Attempt to get from cache.
-  /** @type {Response | undefined} */
-  let resource = await caches.match(request);
-  if (resource) {
-    if (log) console.log('service worker got', href, 'from cache');
-  } else {
-    try {
-      // Get from network.
-      resource = await fetch(request);
-      if (log) console.log('service worker got', href, 'from network');
-
-      if (shouldCache(pathname)) {
-        // Save in cache for when we are offline later.
-        const cache = await caches.open(cacheName);
-        await cache.add(url);
-        if (log) console.log('service worker cached', href);
-      }
-    } catch (error) {
-      console.error('service worker failed to fetch', url);
-      console.log('service-worker.js getResource: error =', error);
-      resource = new Response('', {status: 404});
-    }
-  }
-
-  return resource;
-}
-
-/**
- * This sets the dogRouter variable to a Router
- * that is used to handle API requests for dogs.
- */
-function setDogRouter() {
-  const promise = IDBEasy.openDB(dbName, version, (db, event) => {
-    const dogController = new DogController(new IDBEasy(db));
-    dogController.upgrade(event);
-  });
-
-  // Top-level await is not allowed in service workers.
-  promise.then(upgradedDB => {
-    const dogController = new DogController(new IDBEasy(upgradedDB));
-    dogRouter = getRouter(dogController);
-  });
-}
-
-/**
- * This determines whether the file at a given pathname should be cached.
- * @param {string} pathname
- * @returns {boolean}
- */
-function shouldCache(pathname) {
-  if (pathname.endsWith('setup.js')) return false;
-  if (pathname.endsWith('service-worker.js')) return false;
-  const index = pathname.lastIndexOf('.');
-  const extension = index === -1 ? '' : pathname.substring(index + 1);
-  return fileExtensionsToCache.includes(extension);
-}
-
 //-----------------------------------------------------------------------------
-
-self.addEventListener('install', event => {
-  console.log('service-worker.js: installing');
-  // This causes a newly installed service worker to
-  // progress to the activating state, regardless of
-  // whether there is already an active service worker.
-  self.skipWaiting();
-});
 
 /**
  * This converts a base64 string to a Uint8Array.
@@ -167,23 +59,84 @@ function base64StringToUint8Array(base64String) {
 }
 
 /**
- * @typedef {object} SubscriptionKeys
- * @property auth {string}
- * @property p256dh {string}
+ * This deletes all the keys from a given cache.
+ * It is not currently used.
+ * @param {string} cacheName
+ * @returns {Promise<void>}
  */
+async function deleteCache(cacheName) {
+  // @type {string[]}
+  const keys = await caches.keys();
+  await Promise.all(
+    keys.map(key => (key === cacheName ? null : caches.delete(key)))
+  );
+}
 
 /**
- * @typedef {object} Subscription
- * @property endpoint {string}
- * @property expirationTime {number | null}
- * @property keys {SubscriptionKeys}
+ * This gets the body of a request as text.
+ * It is not currently used.
+ * @param {Request} request
+ * @returns {Promise<string>} the body text
  */
+async function getBodyText(request) {
+  const {body} = request;
+  if (!body) return '';
+  const reader = body.getReader();
+  let result = '';
+  while (true) {
+    const {done, value} = await reader.read();
+    const text = new TextDecoder().decode(value);
+    result += text;
+    if (done) break;
+  }
+  return result;
+}
 
 /**
- * This saves a subscription on the server
- * so it can send push notifications to this client.
+ * This attempts to get a resource from the cache.
+ * If it is not found in the cache, it is retrieved from the network.
+ * If it is a kind of resource we want to cache, it is added to the cache.
+ * @param {Request} request
+ * @returns {Promise<Response>} that contains the resource
+ */
+async function getResource(request) {
+  const log = false; // set to true for debugging
+  const url = new URL(request.url);
+  const {href, pathname} = url;
+
+  // Attempt to get the resource from the cache.
+  /** @type {Response | undefined} */
+  let resource = await caches.match(request);
+
+  if (resource) {
+    if (log) console.log('service worker got', href, 'from cache');
+  } else {
+    try {
+      // Get the resource from the network.
+      resource = await fetch(request);
+      if (log) console.log('service worker got', href, 'from network');
+
+      if (shouldCache(pathname)) {
+        // Save in the cache to avoid unnecessary future network requests
+        // and supports offline use.
+        const cache = await caches.open(cacheName);
+        await cache.add(url);
+        if (log) console.log('service worker cached', href);
+      }
+    } catch (error) {
+      console.error('service-worker.js getResource:', error);
+      console.error('service worker failed to fetch', url);
+      resource = new Response('', {status: 404});
+    }
+  }
+
+  return resource;
+}
+
+/**
+ * This saves a push notification subscription on the server
+ * so the server can send push notifications to this client.
  * @param {Subscription} subscription
- * @returns
  */
 async function saveSubscription(subscription) {
   try {
@@ -197,24 +150,90 @@ async function saveSubscription(subscription) {
   }
 }
 
+/**
+ * This sets the dogRouter variable to a Router
+ * that is used to handle API requests for dogs.
+ * I tried for a couple of hours to simplify this code
+ * and couldn't arrive at an alternative that works.
+ */
+function setDogRouter() {
+  const promise = IDBEasy.openDB(dbName, version, (db, event) => {
+    const dogController = new DogController(new IDBEasy(db));
+    dogController.upgrade(event);
+  });
+
+  // Top-level await is not allowed in service workers.
+  promise.then(upgradedDB => {
+    const dogController = new DogController(new IDBEasy(upgradedDB));
+    dogRouter = getRouter(dogController);
+  });
+}
+
+/**
+ * This determines whether the file at a given path should be cached
+ * based on its file extension.
+ * @param {string} pathname
+ * @returns {boolean} true to cache; false otherwise
+ */
+function shouldCache(pathname) {
+  if (pathname.endsWith('setup.js')) return false;
+  if (pathname.endsWith('service-worker.js')) return false;
+  const index = pathname.lastIndexOf('.');
+  const extension = index === -1 ? '' : pathname.substring(index + 1);
+  return fileExtensionsToCache.includes(extension);
+}
+
+//-----------------------------------------------------------------------------
+
+/**
+ * This registers a listener for the "install" event of this service worker.
+ */
+self.addEventListener('install', event => {
+  console.log('service-worker.js: installing');
+  // It allows existing browser tabs to use an
+  // updated version of this service worker.
+  self.skipWaiting();
+});
+
+/**
+ * @typedef {object} SubscriptionKeys
+ * @property auth {string}
+ * @property p256dh {string}
+ */
+
+/**
+ * @typedef {object} Subscription
+ * @property endpoint {string}
+ * @property expirationTime {number | null}
+ * @property keys {SubscriptionKeys}
+ */
+
+/**
+ * This registers a listener for the "activate" event of this service worker.
+ */
 self.addEventListener('activate', async event => {
   console.log('service-worker.js: activating');
+
+  // We could choose to delete the current cache every time
+  // a new version of the service worker is activated.
   // event.waitUntil(deleteCache(cacheName));
 
+  // This gets an estimate for the amount of storage available
+  // to this service worker.
   // Safari says "The operation is not supported." for the "estimate" method.
   // const estimate = await navigator.storage.estimate();
-  // console.log('setup.js: storage estimate =', estimate);
+  // console.log('service-worker.js: storage estimate =', estimate);
 
+  // Subscribe to receive push notifications.
   const subscription = await self.registration.pushManager.subscribe({
-    // To get this public key,
-    // enter "npx web-push generate-vapid-keys" in a terminal.
     applicationServerKey: base64StringToUint8Array(publicKey),
     userVisibleOnly: true // false allows silent push notifications
   });
+  // Save the subscription on the server.
   await saveSubscription(subscription);
 
+  // Let browser clients know that the service worker is ready.
   try {
-    // Let browser clients know that the service worker is ready.
     const clients = await self.clients.matchAll({includeUncontrolled: true});
     for (const client of clients) {
       client.postMessage('service worker ready');
