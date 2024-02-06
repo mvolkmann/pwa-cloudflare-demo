@@ -1,4 +1,5 @@
 async function setupServiceWorker() {
+  // All modern browsers support service workers.
   if (!('serviceWorker' in navigator)) {
     console.error('Your browser does not support service workers');
     return;
@@ -6,15 +7,16 @@ async function setupServiceWorker() {
 
   try {
     // Register the service worker.
-    // TODO: If s already registered, does this return information about it?
+    // If it is already registered, information about it will be returned.
     const reg = await navigator.serviceWorker.register('service-worker.js', {
       type: 'module'
     });
 
-    // TODO: Why doesn't this work?
-    // reg.showNotification('Can you see this?');
+    // This demonstrates displaying a push notification
+    // after the service worker is registered.
+    reg.showNotification('A service worker was registered.');
 
-    // Get the existing subscription for push notifications.
+    // Attempt to get an existing subscription for push notifications.
     let subscription = reg.pushManager.getSubscription();
     if (!subscription) {
       // No subscription was found, so create one.
@@ -41,37 +43,6 @@ async function setupServiceWorker() {
       const data = await response.json();
       console.log('setup.js: data =', data);
     }
-
-    // TO TEST THIS:
-    // - open Chrome DevTools
-    // - click the "Application" tab
-    // - click "Service Workers"
-    // - enter text for a push message
-    // - click the "Push" button
-    // - a browser popup should appear
-
-    /*
-    // TODO: Should you care about these state changes?
-    reg.onupdatefound = () => {
-      const newSW = reg.installing;
-      newSW.addEventListener('statechange', event => {
-        switch (newSW.state) {
-          case 'installed':
-            if (navigator.serviceWorker.controller) {
-              console.log('setup.js: update is available');
-            } else {
-              console.log('setup.js: content is cached for offline use');
-            }
-            break;
-          case 'redundant':
-            console.error(
-              'setup.js: installing service worker became redundant'
-            );
-            break;
-        }
-      });
-    };
-    */
   } catch (error) {
     console.error('setup.js setupServiceWorker registered failed:', error);
   }
@@ -99,26 +70,29 @@ navigator.serviceWorker.onmessage = event => {
   }
 };
 
-// If the user has not already granted permission for notifications,
-// this will ask for permission.
-// It is recommended to wait to ask for permission until the user has
-// entered the site is made aware of why they would receive notifications.
-// Perhaps provide a "Enable Notifications" button that calls this function.
-
-// The choice is remembered by the browser.
-// The value will be "granted", "denied", or "default" (no choice made).
-
-// To reset back to "default" in Chrome:
-// - Click the circled "i" on the left end of the address bar.
-// - Click the "Reset Permissions" button.
-
-// To reset back to "default" in Safari:
-// - Click "Safari" in the menu bar.
-// - Click "Settings..." in the menu.
-// - Click "Notifications" in the left nav of the dialog that appears.
-// Scroll to the website domain in the main area of the dialog.
-// Select it and click the "Remove" button.
-
+/**
+ * This asks the user for permission to send push notifications
+ * if they have not already granted or denied this.
+ *
+ * It is recommended to wait to ask for permission until the user has
+ * entered the site is made aware of why they would receive notifications.
+ * Perhaps provide a "Enable Notifications" button that calls this function
+ * as is done in public/index.html.
+ *
+ * The choice is remembered by the browser.
+ * The value will be "granted", "denied", or "default" (no choice made).
+ *
+ * To reset back to "default" in Chrome:
+ * - Click the circled "i" on the left end of the address bar.
+ * - Click the "Reset Permissions" button.
+ *
+ * To reset back to "default" in Safari:
+ * - Click "Safari" in the menu bar.
+ * - Click "Settings..." in the menu.
+ * - Click "Notifications" in the left nav of the dialog that appears.
+ * - Scroll to the website domain in the main area of the dialog.
+ * - Select it and click the "Remove" button.
+ */
 async function requestNotificationPermission() {
   const permission = await Notification.requestPermission();
   if (permission === 'granted') {

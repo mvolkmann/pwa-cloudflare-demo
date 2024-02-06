@@ -265,10 +265,11 @@ self.addEventListener('fetch', async event => {
  * One way to test this is to trigger a push from Chrome DevTools.
  * Click the "Application" tab, click "Service workers" in the left nav,
  * enter a message in the Push input, and click the "Push" button.
+ * A push notification should appear.
  */
 self.addEventListener('push', async event => {
   console.log('service-worker.js push: event =', event);
   const text = event.data.text();
-  // event.waitUntil(self.registration.showNotification('My Title', {body: text}));
+  //TODO: How can you specify the icon to appear in the push notification?
   self.registration.showNotification('My Title', {body: text});
 });
