@@ -40,6 +40,23 @@
       <span x-text="networkStatus"></span>
     </div>
 
+    <template x-if="Notification.permission === 'default'">
+      <button @click="requestNotificationPermission()">
+        Enable Notifications
+      </button>
+    </template>
+    <template x-if="Notification.permission === 'granted'">
+      <div>
+        <div>Notifications are enabled.</div>
+        <button @click="new Notification('Hello, User!')">
+          Send Notification
+        </button>
+      </div>
+    </template>
+    <template x-if="Notification.permission === 'denied'">
+      <div>Notifications were denied.</div>
+    </template>
+
     <section>
       <form
         hx-on:htmx:after-request="this.reset()"

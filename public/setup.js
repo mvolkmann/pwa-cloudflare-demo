@@ -5,12 +5,16 @@ async function setupServiceWorker() {
   }
 
   try {
+    // Register the service worker.
+    // TODO: If s already registered, does this return information about it?
     const reg = await navigator.serviceWorker.register('service-worker.js', {
       type: 'module'
     });
 
+    // Get the existing subscription for push notifications.
     let subscription = reg.pushManager.getSubscription();
     if (!subscription) {
+      // No subscription was found, so create one.
       subscription = reg.pushManager.subscribe({
         applicationServerKey: '?',
         userVisibleOnly: true
@@ -34,26 +38,6 @@ async function setupServiceWorker() {
       const data = await response.json();
       console.log('setup.js: data =', data);
     }
-
-    // To revoke this permission in Chrome:
-    // TODO: I'm not sure this is correct.
-    // - click the ellipsis menu button in the upper-right
-    // - click "Settings"
-    // - click "Privacy and security"
-    // - click "Site settings"
-    // - click "Notifications"
-    // - click "http://localhost:8787"
-    // - under "Permissions", change the value for "Notifications"
-    //   from "Allow" to "Ask (default)"
-    Notification.requestPermission(result => {
-      console.log('permission result =', result);
-      if (result === 'granted') {
-        console.log('Notification permission was granted.');
-        // configurePushSub(); // Write your custom function that pushes your message
-      } else {
-        console.log('Notification permission was not granted.');
-      }
-    });
 
     // TO TEST THIS:
     // - open Chrome DevTools
@@ -92,6 +76,9 @@ async function setupServiceWorker() {
 
 setupServiceWorker();
 
+// Register to receive messages from the service worker.
+// These are sent with "client.postMessage" in the service worker.
+// They are not push notifications.
 navigator.serviceWorker.onmessage = () => {
   // console.log('setup.js: message from service worker =', event.data);
   const haveServiceWorker = Boolean(navigator.serviceWorker.controller);
@@ -104,3 +91,35 @@ navigator.serviceWorker.onmessage = () => {
     }, 100);
   }
 };
+
+// If the user has not already granted permission for notifications,
+// this will ask for permission.
+// It is recommended to wait to ask for permission until the user has
+// entered the site is made aware of why they would receive notifications.
+// Perhaps provide a "Enable Notifications" button that calls this function.
+
+// The choice is remembered by the browser.
+// The value will be "granted", "denied", or "default" (no choice made).
+
+// To reset back to "default" in Chrome:
+// - Click the circled "i" on the left end of the address bar.
+// - Click the "Reset Permissions" button.
+
+// To reset back to "default" in Safari:
+// - Click "Safari" in the menu bar.
+// - Click "Settings..." in the menu.
+// - Click "Notifications" in the left nav of the dialog that appears.
+// Scroll to the website domain in the main area of the dialog.
+// Select it and click the "Remove" button.
+
+async function requestNotificationPermission() {
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    // This message will appear in a popup.
+    new Notification('Notifications are enabled.');
+  } else {
+    alert('Notifications are disabled.');
+  }
+  // Update the UI to reflect the new permission.
+  location.reload();
+}
