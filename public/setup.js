@@ -15,34 +15,6 @@ async function setupServiceWorker() {
     // This demonstrates displaying a push notification
     // after the service worker is registered.
     reg.showNotification('A service worker was registered.');
-
-    // Attempt to get an existing subscription for push notifications.
-    let subscription = reg.pushManager.getSubscription();
-    if (!subscription) {
-      // No subscription was found, so create one.
-      subscription = reg.pushManager.subscribe({
-        applicationServerKey: '?',
-        userVisibleOnly: true
-      });
-      console.log('setup.js: subscription =', subscription);
-      const info = {
-        endpoint: '?',
-        // This is the server public key.
-        // When the server sends a push notification,
-        // it must encrypt it with this public key.
-        keys: {
-          auth: '?',
-          p256dh: '?'
-        }
-      };
-      const response = await fetch('/push-subscribe', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(info)
-      });
-      const data = await response.json();
-      console.log('setup.js: data =', data);
-    }
   } catch (error) {
     console.error('setup.js setupServiceWorker registered failed:', error);
   }

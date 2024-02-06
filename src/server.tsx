@@ -99,14 +99,6 @@ app.get('/push-notification', async (c: Context) => {
   return c.text('push notification sent');
 });
 
-/* TODO: Is this needed?
-app.post('/push-subscribe', async (c: Context) => {
-  subscription = await c.req.json();
-  console.log('server.tsx push-subscribe: subscription =', subscription);
-  return c.json({what: 'should this return?'});
-});
-*/
-
 app.post('/save-subscription', async (c: Context) => {
   const subscription = await c.req.json();
   //TODO: Save these in a SQLite database so

@@ -266,6 +266,7 @@ self.addEventListener('fetch', async event => {
  * Click the "Application" tab, click "Service workers" in the left nav,
  * enter a message in the Push input, and click the "Push" button.
  * A push notification should appear.
+ * Push notifications automatically disappear after about five seconds.
  */
 self.addEventListener('push', async event => {
   console.log('service-worker.js push: event =', event);
