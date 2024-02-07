@@ -26,19 +26,24 @@ const ROWS_PER_PAGE = 10;
 let subscriptions: any[] = [];
 
 // This demonstrates triggering push notifications from a server.
-/*
+// It sends a new push notification every 5 seconds.
 let count = 0;
 setInterval(() => {
   if (subscriptions.length) {
     count++;
-    pushNotification(`count = ${count}`);
+    const payload = JSON.stringify({
+      title: 'From server.tsx',
+      body: `count = ${count}`,
+      icon: 'subscribe.png'
+    });
+    // Send the payload to the "push" event listener in the service worker.
+    pushNotification(payload);
   }
 }, 5000);
-*/
 
 //-----------------------------------------------------------------------------
 
-function pushNotification(payload: string) {
+function pushNotification(payload: string | object) {
   if (subscriptions.length) {
     const options = {
       TTL: 60 // max time in seconds for push service to retry delivery
@@ -47,7 +52,9 @@ function pushNotification(payload: string) {
       webPush.sendNotification(subscription, payload, options);
     }
   } else {
-    console.error('server.tsx: pushMessage called with no subscription');
+    console.error(
+      'server.tsx pushNotification: no clients have subscribed yet'
+    );
   }
 }
 

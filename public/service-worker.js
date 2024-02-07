@@ -135,6 +135,12 @@ async function getResource(request) {
   return resource;
 }
 
+function inSafari() {
+  const {userAgent} = navigator;
+  if (!userAgent.includes('Safari')) return false;
+  return !userAgent.includes('Chrome');
+}
+
 /**
  * This saves a push notification subscription on the server
  * so the server can send push notifications to this client.
@@ -186,6 +192,13 @@ function shouldCache(pathname) {
 }
 
 async function subscribeToPushNotifications() {
+  if (inSafari()) {
+    console.log(
+      'service-worker.js: Safari uses a non-standard push notification API that this app does not support.'
+    );
+    return;
+  }
+
   try {
     // This fails if the user has not already granted
     // permission to receive push notifications, so only
@@ -289,11 +302,18 @@ addEventListener('message', event => {
  */
 addEventListener('push', async event => {
   if (Notification.permission === 'granted') {
-    const title = 'PWA Demo';
-    registration.showNotification(title, {
-      body: event.data.text(),
-      icon: 'subscribe.png'
-    });
+    let title, body, icon;
+    try {
+      // If the event data is JSON, expect it
+      // to have title, body, and icon properties.
+      const {title, body, icon} = event.data.json();
+      registration.showNotification(title, {body, icon});
+    } catch (error) {
+      // Otherwise assume the event data is text
+      // that can be used as the notification title.
+      const title = event.data.text();
+      registration.showNotification(title);
+    }
   } else {
     console.error('service-worker.js: push permission not granted');
   }
