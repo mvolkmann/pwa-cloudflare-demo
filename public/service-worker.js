@@ -40,18 +40,24 @@ setDogRouter();
  * @returns a Uint8Array
  */
 function base64StringToUint8Array(base64String) {
+  // Add equal signs to the end so the length is a multiple of 4.
+  // See https://base64.guru/learn/base64-characters.
+  //
+  // The following site says "The base64 Decode converter does not support
+  // dash("-") and underscore("_") characters, therefore it is necessary to
+  // replace those characters before doing the Base64 decoding.
+  // Use "+" instead of "-" and "/" instead of "_"."
+  // https://docshield.kofax.com/RPA/en_US/10.6.0_p2wddr4n2j/help/kap_help/reference/c_basedecode.html
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
     .replace(/\-/g, '+')
     .replace(/_/g, '/');
 
-  const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
+  const binary = atob(base64);
+  const outputArray = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; ++i) {
+    outputArray[i] = binary.charCodeAt(i);
   }
-
   return outputArray;
 }
 
