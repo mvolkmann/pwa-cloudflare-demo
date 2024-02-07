@@ -1,3 +1,7 @@
+function sendNotification(title, body, icon) {
+  new Notification(title, {body, icon});
+}
+
 async function setupServiceWorker() {
   // All modern browsers support service workers.
   if (!('serviceWorker' in navigator)) {

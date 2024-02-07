@@ -48,7 +48,9 @@
     <template x-if="Notification.permission === 'granted'">
       <div>
         <div>Notifications are enabled.</div>
-        <button @click="new Notification('Hello, User!')">
+        <button
+          @click="sendNotification('My Title', 'My Body', 'subscribe.png')"
+        >
           Send Notification
         </button>
       </div>
