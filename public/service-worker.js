@@ -183,6 +183,23 @@ function shouldCache(pathname) {
   return fileExtensionsToCache.includes(extension);
 }
 
+// TODO: Is "self." needed anywhere in this code?
+async function subscribeToPushNotifications() {
+  try {
+    //TODO: This fails if the user has not already granted permission
+    //TODO: to receive push notifications.
+    //TODO: Only do this when they grant permission!
+    const subscription = await self.registration.pushManager.subscribe({
+      applicationServerKey: base64StringToUint8Array(publicKey),
+      userVisibleOnly: true // false allows silent push notifications
+    });
+    // Save the subscription on the server.
+    await saveSubscription(subscription);
+  } catch (error) {
+    console.error('service-worker.js subscribeToPushNotifications:', error);
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 /**
@@ -211,7 +228,7 @@ self.addEventListener('install', event => {
 /**
  * This registers a listener for the "activate" event of this service worker.
  */
-self.addEventListener('activate', async event => {
+addEventListener('activate', async event => {
   console.log('service-worker.js: activating');
 
   // We could choose to delete the current cache every time
@@ -225,18 +242,6 @@ self.addEventListener('activate', async event => {
   // console.log('service-worker.js: storage estimate =', estimate);
 
   try {
-    //TODO: This fails if the user has no already granted permission
-    //TODO: to receive push notifications.
-    //TODO: Only do this when they grant permission!
-    //TODO: See the TODO in setup.js!
-    // Subscribe to receive push notifications.
-    const subscription = await self.registration.pushManager.subscribe({
-      applicationServerKey: base64StringToUint8Array(publicKey),
-      userVisibleOnly: true // false allows silent push notifications
-    });
-    // Save the subscription on the server.
-    await saveSubscription(subscription);
-
     // Let browser clients know that the service worker is ready.
     const clients = await self.clients.matchAll({includeUncontrolled: true});
     for (const client of clients) {
@@ -252,7 +257,7 @@ self.addEventListener('activate', async event => {
  * This registers a listener for the "fetch" event of this service worker.
  * It responds with a resource for accessing data at a requested URL.
  */
-self.addEventListener('fetch', async event => {
+addEventListener('fetch', async event => {
   const {request} = event;
   const url = new URL(request.url);
   const {pathname} = url;
@@ -264,6 +269,15 @@ self.addEventListener('fetch', async event => {
   event.respondWith(promise);
 });
 
+addEventListener('message', event => {
+  const message = event.data;
+  if (message === 'subscribe') {
+    subscribeToPushNotifications();
+  } else {
+    console.error('service-worker.js: unexpected message =', message);
+  }
+});
+
 /**
  * This registers a listener for the "push" event of this service worker.
  * One way to test this is to trigger a push from Chrome DevTools.
@@ -272,7 +286,7 @@ self.addEventListener('fetch', async event => {
  * A push notification should appear.
  * Push notifications automatically disappear after about five seconds.
  */
-self.addEventListener('push', async event => {
+addEventListener('push', async event => {
   // console.log('service-worker.js push: event =', event);
   const text = event.data.text();
   //TODO: How can you specify the icon to appear in the push notification?

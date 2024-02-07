@@ -60,13 +60,13 @@ navigator.serviceWorker.onmessage = event => {
  * - Click "Notifications" in the left nav of the dialog that appears.
  * - Scroll to the website domain in the main area of the dialog.
  * - Select it and click the "Remove" button.
+ *
+ * TODO: Include screenshots of the above steps in PWA blog page.
  */
 async function requestNotificationPermission() {
   const permission = await Notification.requestPermission();
   if (permission === 'granted') {
-    // TODO: Run the code in the service worker to register with the push manager!
-    // This message will appear in a popup.
-    new Notification('Notifications are enabled.');
+    navigator.serviceWorker.controller.postMessage('subscribe');
   } else {
     alert('Notifications are disabled.');
   }
