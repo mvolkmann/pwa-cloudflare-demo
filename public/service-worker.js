@@ -1,6 +1,3 @@
-//TODO: Which of these lines are really required?
-/// <reference no-default-lib="true"/>
-/// <reference lib="ES2016" />
 /// <reference lib="webworker" />
 
 import DogController from './dog-controller.js';

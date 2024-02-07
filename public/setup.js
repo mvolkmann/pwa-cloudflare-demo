@@ -1,3 +1,9 @@
+/**
+ * This sends a push notification.
+ * @param {string} title
+ * @param {string} body
+ * @param {string} icon
+ */
 function sendNotification(title, body, icon) {
   new Notification(title, {body, icon});
 }
