@@ -56,22 +56,6 @@ navigator.serviceWorker.onmessage = event => {
  * entered the site is made aware of why they would receive notifications.
  * Perhaps provide a "Enable Notifications" button that calls this function
  * as is done in public/index.html.
- *
- * The choice is remembered by the browser.
- * The value will be "granted", "denied", or "default" (no choice made).
- *
- * To reset back to "default" in Chrome:
- * - Click the circled "i" on the left end of the address bar.
- * - Click the "Reset Permissions" button.
- *
- * To reset back to "default" in Safari:
- * - Click "Safari" in the menu bar.
- * - Click "Settings..." in the menu.
- * - Click "Notifications" in the left nav of the dialog that appears.
- * - Scroll to the website domain in the main area of the dialog.
- * - Select it and click the "Remove" button.
- *
- * TODO: Include screenshots of the above steps in PWA blog page.
  */
 async function requestNotificationPermission() {
   const permission = await Notification.requestPermission();
