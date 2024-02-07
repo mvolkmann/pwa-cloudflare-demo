@@ -288,8 +288,13 @@ addEventListener('message', event => {
  * Push notifications automatically disappear after about five seconds.
  */
 addEventListener('push', async event => {
-  // console.log('service-worker.js push: event =', event);
-  const text = event.data.text();
-  //TODO: How can you specify the icon to appear in the push notification?
-  registration.showNotification('My Title', {body: text});
+  if (Notification.permission === 'granted') {
+    const title = 'PWA Demo';
+    registration.showNotification(title, {
+      body: event.data.text(),
+      icon: 'subscribe.png'
+    });
+  } else {
+    console.error('service-worker.js: push permission not granted');
+  }
 });
