@@ -1,11 +1,10 @@
 import {Context, Hono} from 'hono';
 import {serveStatic} from 'hono/bun';
-//TODO: web-push does not currently work with Cloudflare Workers!
+//TODO: The web-push package does not currently work with Cloudflare Workers!
 //TODO: See https://github.com/web-push-libs/web-push/issues/718
 //TODO: and https://github.com/aynh/cf-webpush.
 // import {serveStatic} from 'hono/cloudflare-workers';
 
-// TODO: Add to notes that this must be installed with `bun add web-push`.
 const webPush = require('web-push');
 webPush.setVapidDetails(
   'mailto:r.mark.volkmann@gmail.com',
