@@ -35,7 +35,6 @@ setDogRouter();
 
 /**
  * This converts a base64 string to a Uint8Array.
- * TODO: Is there an easier way to do this?
  * @param {string} base64String
  * @returns a Uint8Array
  */
@@ -188,9 +187,9 @@ function shouldCache(pathname) {
 
 async function subscribeToPushNotifications() {
   try {
-    //TODO: This fails if the user has not already granted permission
-    //TODO: to receive push notifications.
-    //TODO: Only do this when they grant permission!
+    // This fails if the user has not already granted
+    // permission to receive push notifications, so only
+    // call this function after they grant permission.
     const subscription = await registration.pushManager.subscribe({
       applicationServerKey: base64StringToUint8Array(publicKey),
       userVisibleOnly: true // false allows silent push notifications
