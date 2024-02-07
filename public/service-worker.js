@@ -183,13 +183,12 @@ function shouldCache(pathname) {
   return fileExtensionsToCache.includes(extension);
 }
 
-// TODO: Is "self." needed anywhere in this code?
 async function subscribeToPushNotifications() {
   try {
     //TODO: This fails if the user has not already granted permission
     //TODO: to receive push notifications.
     //TODO: Only do this when they grant permission!
-    const subscription = await self.registration.pushManager.subscribe({
+    const subscription = await registration.pushManager.subscribe({
       applicationServerKey: base64StringToUint8Array(publicKey),
       userVisibleOnly: true // false allows silent push notifications
     });
@@ -205,11 +204,11 @@ async function subscribeToPushNotifications() {
 /**
  * This registers a listener for the "install" event of this service worker.
  */
-self.addEventListener('install', event => {
+addEventListener('install', event => {
   console.log('service-worker.js: installing');
   // It allows existing browser tabs to use an
   // updated version of this service worker.
-  self.skipWaiting();
+  skipWaiting();
 });
 
 /**
@@ -243,8 +242,8 @@ addEventListener('activate', async event => {
 
   try {
     // Let browser clients know that the service worker is ready.
-    const clients = await self.clients.matchAll({includeUncontrolled: true});
-    for (const client of clients) {
+    const matches = await clients.matchAll({includeUncontrolled: true});
+    for (const client of matches) {
       // setup.js listens for this message.
       client.postMessage('ready');
     }
@@ -290,5 +289,5 @@ addEventListener('push', async event => {
   // console.log('service-worker.js push: event =', event);
   const text = event.data.text();
   //TODO: How can you specify the icon to appear in the push notification?
-  self.registration.showNotification('My Title', {body: text});
+  registration.showNotification('My Title', {body: text});
 });

@@ -66,6 +66,7 @@ navigator.serviceWorker.onmessage = event => {
 async function requestNotificationPermission() {
   const permission = await Notification.requestPermission();
   if (permission === 'granted') {
+    // service-worker.js listens for this message.
     navigator.serviceWorker.controller.postMessage('subscribe');
   } else {
     alert('Notifications are disabled.');
