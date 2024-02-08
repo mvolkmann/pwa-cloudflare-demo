@@ -10,7 +10,7 @@ const version = 1;
 
 // This value was copied from the .env file.
 const publicKey =
-  'BMx9QagkN_EidkH7D8jdZaz5BM2Hh-d3RQ5W1iWOfh32KRdbxu7fATv5ozLPUfQasRIZo7JQ6ULGVKgfUX3HO7A';
+  'BLqlJ1001ZxraUEtFPKGDJTBm8Cmk6i44-mtv8i2p8ReAU8orbyC90zdjeJL-hCRooyPRcQoKBquc4sQ1uIlh0E';
 
 // We aren't currently caching .css files and certain .js files
 // because we want changes to be reflected without clearing the cache.
@@ -204,22 +204,16 @@ async function subscribeToPushNotifications() {
     return;
   }
 
-  console.log(
-    'service-worker.js subscribeToPushNotifications: entering try block'
-  );
   try {
     // This fails if the user has not already granted
     // permission to receive push notifications, so only
     // call this function after they grant permission.
-    //TODO: Why does this never return?
+    // WARNING: If the "Update on reload" checkbox in the Chrome DevTools
+    // Application tab is checked, the following line will not work.
     const subscription = await registration.pushManager.subscribe({
       applicationServerKey: base64StringToUint8Array(publicKey),
       userVisibleOnly: true // false allows silent push notifications
     });
-    console.log(
-      'service-worker.js subscribeToPushNotifications: subscription =',
-      subscription
-    );
     // Save the subscription on the server.
     await saveSubscription(subscription);
   } catch (error) {
