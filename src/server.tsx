@@ -25,6 +25,8 @@ let subscriptions = dbSubscriptions.map(dbSub => {
   return subscription;
 });
 
+// Setup use of the web-push package.
+// For details, see https://github.com/web-push-libs/web-push.
 const webPush = require('web-push');
 webPush.setVapidDetails(
   'mailto:r.mark.volkmann@gmail.com',
