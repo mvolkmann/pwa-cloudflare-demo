@@ -148,11 +148,16 @@ function inSafari() {
  */
 async function saveSubscription(subscription) {
   try {
+    console.log(
+      'service-worker.js saveSubscription: subscription =',
+      subscription
+    );
     await fetch('/save-subscription', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(subscription)
     });
+    console.log('service-worker.js saveSubscription: sent POST');
   } catch (error) {
     console.error('service-worker.js saveSubscription:', error);
   }
@@ -199,14 +204,22 @@ async function subscribeToPushNotifications() {
     return;
   }
 
+  console.log(
+    'service-worker.js subscribeToPushNotifications: entering try block'
+  );
   try {
     // This fails if the user has not already granted
     // permission to receive push notifications, so only
     // call this function after they grant permission.
+    //TODO: Why does this never return?
     const subscription = await registration.pushManager.subscribe({
       applicationServerKey: base64StringToUint8Array(publicKey),
       userVisibleOnly: true // false allows silent push notifications
     });
+    console.log(
+      'service-worker.js subscribeToPushNotifications: subscription =',
+      subscription
+    );
     // Save the subscription on the server.
     await saveSubscription(subscription);
   } catch (error) {

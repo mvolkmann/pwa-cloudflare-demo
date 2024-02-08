@@ -127,10 +127,10 @@ export default class DogController {
   upgrade(event) {
     const {newVersion, oldVersion} = event;
     if (oldVersion === 0) {
-      console.log('creating first version of database');
+      console.log('creating first version of IndexedDB database');
     } else {
       console.log(
-        'upgrading database from version',
+        'upgrading IndexedDB database from version',
         oldVersion,
         'to',
         newVersion
