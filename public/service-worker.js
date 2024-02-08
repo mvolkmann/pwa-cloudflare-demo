@@ -99,7 +99,7 @@ async function getBodyText(request) {
  * If it is not found in the cache, it is retrieved from the network.
  * If it is a kind of resource we want to cache, it is added to the cache.
  * @param {Request} request
- * @returns {Promise<Response>} that contains the resource
+ * @returns {Promise<Response | undefined>} that contains the resource
  */
 async function getResource(request) {
   const log = false; // set to true for debugging
@@ -135,32 +135,14 @@ async function getResource(request) {
   return resource;
 }
 
+/**
+ * This determines if the current browser is Safari.
+ * @returns {boolean} true if Safari; false otherwise
+ */
 function inSafari() {
   const {userAgent} = navigator;
   if (!userAgent.includes('Safari')) return false;
   return !userAgent.includes('Chrome');
-}
-
-/**
- * This saves a push notification subscription on the server
- * so the server can send push notifications to this client.
- * @param {Subscription} subscription
- */
-async function saveSubscription(subscription) {
-  try {
-    console.log(
-      'service-worker.js saveSubscription: subscription =',
-      subscription
-    );
-    await fetch('/save-subscription', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(subscription)
-    });
-    console.log('service-worker.js saveSubscription: sent POST');
-  } catch (error) {
-    console.error('service-worker.js saveSubscription:', error);
-  }
 }
 
 /**
@@ -214,8 +196,14 @@ async function subscribeToPushNotifications() {
       applicationServerKey: base64StringToUint8Array(publicKey),
       userVisibleOnly: true // false allows silent push notifications
     });
-    // Save the subscription on the server.
-    await saveSubscription(subscription);
+
+    // Save the subscription on the server so it can
+    // send push notifications to this service worker.
+    await fetch('/save-subscription', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(subscription)
+    });
   } catch (error) {
     console.error('service-worker.js subscribeToPushNotifications:', error);
   }
@@ -228,23 +216,10 @@ async function subscribeToPushNotifications() {
  */
 addEventListener('install', event => {
   console.log('service-worker.js: installing');
-  // It allows existing browser tabs to use an
+  // This allows existing browser tabs to use an
   // updated version of this service worker.
   skipWaiting();
 });
-
-/**
- * @typedef {object} SubscriptionKeys
- * @property auth {string}
- * @property p256dh {string}
- */
-
-/**
- * @typedef {object} Subscription
- * @property endpoint {string}
- * @property expirationTime {number | null}
- * @property keys {SubscriptionKeys}
- */
 
 /**
  * This registers a listener for the "activate" event of this service worker.
@@ -290,6 +265,9 @@ addEventListener('fetch', async event => {
   event.respondWith(promise);
 });
 
+/**
+ * This registers a listener for the "message" event of this service worker.
+ */
 addEventListener('message', event => {
   const message = event.data;
   if (message === 'subscribe') {

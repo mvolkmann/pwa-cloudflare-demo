@@ -1,13 +1,17 @@
 import {Database} from 'bun:sqlite';
 import {Context, Hono} from 'hono';
 import {serveStatic} from 'hono/bun';
-//TODO: The web-push package does not currently work with Cloudflare Workers!
-//TODO: See https://github.com/web-push-libs/web-push/issues/718
-//TODO: and https://github.com/aynh/cf-webpush.
+
+// We cannot use the following import because the web-push package
+// does not currently work with Cloudflare Workers!
+// See https://github.com/web-push-libs/web-push/issues/718
+// and https://github.com/aynh/cf-webpush.
 // import {serveStatic} from 'hono/cloudflare-workers';
 
+// Prepare to use a SQLite database.
 type DBSubscription = {id: number; json: string};
 const db = new Database('pwa.db', {create: true});
+const deleteTodoPS = db.prepare('delete from subscriptions where id = ?');
 const getAllSubscriptions = db.query('select * from subscriptions;');
 const insertSubscription = db.query(
   'insert into subscriptions (json) values (?)'
@@ -15,7 +19,11 @@ const insertSubscription = db.query(
 
 // Restore previous subscriptions from database.
 const dbSubscriptions = getAllSubscriptions.all() as DBSubscription[];
-const subscriptions = dbSubscriptions.map(s => JSON.parse(s.json));
+let subscriptions = dbSubscriptions.map(dbSub => {
+  const subscription = JSON.parse(dbSub.json);
+  subscription.id = dbSub.id;
+  return subscription;
+});
 
 const webPush = require('web-push');
 webPush.setVapidDetails(
@@ -38,7 +46,7 @@ const ROWS_PER_PAGE = 10;
 // It sends a new push notification every 5 seconds.
 let count = 0;
 setInterval(() => {
-  console.log('server.tsx: subscriptions.length =', subscriptions.length);
+  // console.log('server.tsx: subscriptions.length =', subscriptions.length);
   if (subscriptions.length) {
     count++;
     const payload = JSON.stringify({
@@ -46,25 +54,41 @@ setInterval(() => {
       body: `count = ${count}`,
       icon: 'subscribe.png'
     });
-    // Send the payload to the "push" event listener in the service worker.
     pushNotification(payload);
   }
 }, 5000);
 
 //-----------------------------------------------------------------------------
 
-function pushNotification(payload: string | object) {
+/**
+ * This sends a push notifications to all subscribers.
+ */
+async function pushNotification(payload: string | object) {
   if (subscriptions.length) {
+    const badSubscriptions = [];
     const options = {
       TTL: 60 // max time in seconds for push service to retry delivery
     };
+
     for (const subscription of subscriptions) {
-      webPush.sendNotification(subscription, payload, options);
+      try {
+        // This will fail if the subscription is no longer valid.
+        await webPush.sendNotification(subscription, payload, options);
+      } catch (error) {
+        const message = error.body || error;
+        console.error('server.tsx pushNotification:', message);
+        badSubscriptions.push(subscription);
+      }
+    }
+
+    for (const subscription of badSubscriptions) {
+      // Remove the subscription from the database.
+      deleteTodoPS.run(subscription.id);
+
+      subscriptions = subscriptions.filter(s => s.id !== subscription.id);
     }
   } else {
-    console.error(
-      'server.tsx pushNotification: no clients have subscribed yet'
-    );
+    console.error('server.tsx pushNotification: no clients have subscribed');
   }
 }
 
@@ -126,19 +150,15 @@ app.get('/pokemon-rows', async (c: Context) => {
 });
 
 /**
- * This saves a push notification subscription.
- * The `pushNotification` function above sends push notifications
- * to all saved subscriptions.
+ * This endpoint saves a push notification subscription.
  */
 app.post('/save-subscription', async (c: Context) => {
   const subscription = await c.req.json();
-  console.log('server.tsx save-subscription: subscription =', subscription);
   subscriptions.push(subscription);
 
-  const json = JSON.stringify(subscription);
-  console.log('server.tsx save-subscription: json =', json);
   // Save subscriptions in a SQLite database so
   // they are not lost when the server restarts.
+  const json = JSON.stringify(subscription);
   insertSubscription.get(json);
 
   return c.text('');
