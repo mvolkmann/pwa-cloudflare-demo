@@ -1,4 +1,4 @@
-// import {Database} from 'bun:sqlite';
+import {Database} from 'bun:sqlite';
 import {Context, Hono} from 'hono';
 import {serveStatic} from 'hono/bun';
 //TODO: The web-push package does not currently work with Cloudflare Workers!
@@ -6,7 +6,6 @@ import {serveStatic} from 'hono/bun';
 //TODO: and https://github.com/aynh/cf-webpush.
 // import {serveStatic} from 'hono/cloudflare-workers';
 
-/*
 type DBSubscription = {id: number; json: string};
 const db = new Database('pwa.db', {create: true});
 const getAllSubscriptions = db.query('select * from subscriptions;');
@@ -14,11 +13,9 @@ const insertSubscription = db.query(
   'insert into subscriptions (json) values (?)'
 );
 
+// Restore previous subscriptions from database.
 const dbSubscriptions = getAllSubscriptions.all() as DBSubscription[];
-console.log('server.tsx: dbSubscriptions =', dbSubscriptions);
-const subscriptions = dbSubscriptions.map(s => JSON.parse(s.json).subscription);
-console.log('server.tsx: subscriptions =', subscriptions);
-*/
+const subscriptions = dbSubscriptions.map(s => JSON.parse(s.json));
 
 const webPush = require('web-push');
 webPush.setVapidDetails(
@@ -36,9 +33,6 @@ const POKEMON_IMAGE_URL_PREFIX =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
 const POKEMON_URL_PREFIX = 'https://pokeapi.co/api/v2/pokemon-species';
 const ROWS_PER_PAGE = 10;
-
-//TODO: Get this TypeScript type.
-let subscriptions: any[] = [];
 
 // This demonstrates triggering push notifications from a server.
 // It sends a new push notification every 5 seconds.
@@ -137,17 +131,16 @@ app.get('/pokemon-rows', async (c: Context) => {
  * to all saved subscriptions.
  */
 app.post('/save-subscription', async (c: Context) => {
-  console.log('server.tsx save-subscription: entered');
   const subscription = await c.req.json();
   console.log('server.tsx save-subscription: subscription =', subscription);
-  //TODO: Save these in a SQLite database so
-  //TODO: they are not lost when the server restarts.
   subscriptions.push(subscription);
-  /* TODO: Does this code work?
+
   const json = JSON.stringify(subscription);
   console.log('server.tsx save-subscription: json =', json);
+  // Save subscriptions in a SQLite database so
+  // they are not lost when the server restarts.
   insertSubscription.get(json);
-  */
+
   return c.text('');
 });
 
