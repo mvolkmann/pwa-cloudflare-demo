@@ -1,4 +1,5 @@
-import {button, td, tr} from './js2html.js';
+import elements from './js2htmlstr.js';
+const {button, td, tr} = elements;
 
 // This is the name of an IndexedDB store.
 const storeName = 'dogs';
@@ -17,7 +18,7 @@ const storeName = 'dogs';
  */
 function dogToTableRow(dog) {
   const {breed, id, name} = dog;
-  return tr([
+  return tr(
     td(id),
     td(name),
     td(breed),
@@ -31,7 +32,7 @@ function dogToTableRow(dog) {
         '🗑'
       )
     )
-  ]);
+  );
 }
 
 /**
